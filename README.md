@@ -19,6 +19,7 @@
 Документы в `docs/` — рабочая база для реализации MVP:
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — общая архитектура, диаграмма и поток данных.
+- [docs/BACKEND_AI_DESIGN.md](docs/BACKEND_AI_DESIGN.md) — проект backend и AI-части: модули, интерфейсы, ход игры и интеграция с симуляцией.
 - [docs/API.md](docs/API.md) — REST API, realtime-события и ошибки.
 - [docs/DATA_MODEL.md](docs/DATA_MODEL.md) — модели состояния, поля, объектов, платформы, ИИ и событий.
 - [docs/GAME_SCENARIOS.md](docs/GAME_SCENARIOS.md) — стартовая карта, игровые сценарии и поведение ИИ.

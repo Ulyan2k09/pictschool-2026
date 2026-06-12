@@ -15,7 +15,7 @@
 ```json
 {
   "id": "mission-1",
-  "status": "running",
+  "status": "planning",
   "score": 120,
   "timeLeftSec": 480,
   "currentTaskId": "task-2",
@@ -35,7 +35,7 @@
 - `field` — состояние поля.
 - `platform` — состояние платформы.
 
-Статусы: `idle`, `running`, `paused`, `failed`, `completed`.
+Статусы: `idle`, `planning`, `executing`, `paused`, `failed`, `completed`.
 
 ## Field
 
@@ -92,7 +92,8 @@
   "id": "platform-1",
   "position": { "x": 1, "y": 0 },
   "status": "ready",
-  "lastCommand": "move_forward",
+  "commandQueue": ["up", "right"],
+  "currentCommandIndex": 0,
   "error": null
 }
 ```
@@ -102,10 +103,11 @@
 - `id` — идентификатор платформы или симуляции.
 - `position` — текущая координата.
 - `status` — состояние выполнения.
-- `lastCommand` — последняя команда или `null`.
+- `commandQueue` — массив оставшихся команд плана.
+- `currentCommandIndex` — индекс текущей выполняемой команды.
 - `error` — последняя ошибка или `null`.
 
-Статусы: `ready`, `moving`, `blocked`, `error`, `recovering`.
+Статусы: `ready`, `executing`, `blocked`, `error`, `recovering`.
 
 ## AIAction
 

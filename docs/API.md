@@ -44,7 +44,7 @@
 {
   "mission": {
     "id": "mission-1",
-    "status": "running",
+    "status": "planning",
     "score": 120,
     "timeLeftSec": 480,
     "currentTaskId": "task-2",
@@ -64,7 +64,8 @@
       "id": "platform-1",
       "position": { "x": 1, "y": 0 },
       "status": "ready",
-      "lastCommand": "move_forward",
+      "commandQueue": [],
+      "currentCommandIndex": 0,
       "error": null
     }
   }
@@ -91,7 +92,7 @@
 ```json
 {
   "missionId": "mission-1",
-  "status": "running"
+  "status": "planning"
 }
 ```
 
@@ -99,20 +100,19 @@
 
 Ошибки: `platform_error`, если платформа или симуляция не готова.
 
-### `POST /api/player/command`
+### `POST /api/player/plan`
 
-Отправить команду игрока платформе.
+Отправить план движения (массив команд) платформе.
 
 Запрос:
 
 ```json
 {
-  "command": "move_forward",
-  "params": {
-    "steps": 1
-  }
+  "commands": ["up", "up", "right", "down"]
 }
 ```
+
+Допустимые значения в массиве `commands`: `up`, `down`, `left`, `right`. Бэкенд переводит сессию в статус `executing` и начинает пошаговое выполнение. Если симуляция использует команды вроде `move_forward` и `turn_left`, этот перевод выполняется внутри platform / simulation adapter.
 
 Ответ `202`:
 
@@ -120,13 +120,13 @@
 {
   "accepted": true,
   "eventId": "event-17",
-  "platformStatus": "moving"
+  "platformStatus": "executing"
 }
 ```
 
-События: `player.commanded`, затем `platform.updated`.
+События: `player.plan_submitted`, затем серия `platform.updated` и событий ИИ.
 
-Ошибки: `mission_not_running`, `path_blocked`, `unknown_command`, `platform_error`.
+Ошибки: `mission_not_in_planning`, `unknown_command`.
 
 ### `POST /api/ai/action`
 
@@ -230,7 +230,8 @@
 Обязательные события MVP:
 
 - `mission.started` — миссия запущена.
-- `player.commanded` — игрок отправил команду.
+- `player.plan_submitted` — игрок отправил план движения.
+- `plan.interrupted` — выполнение плана прервано (например, из-за препятствия).
 - `platform.updated` — платформа изменила позицию, статус или ошибку.
 - `ai.object_moved` — ИИ передвинул объект.
 - `ai.path_blocked` — ИИ заблокировал путь или зону.

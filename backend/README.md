@@ -14,6 +14,7 @@
 ## Документация для реализации
 
 - [../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) — ответственность бэкенда и поток данных.
+- [../docs/BACKEND_AI_DESIGN.md](../docs/BACKEND_AI_DESIGN.md) — модули backend, game loop, simulation adapter и интеграция с AI.
 - [../docs/API.md](../docs/API.md) — REST endpoints, realtime-события и формат ошибок.
 - [../docs/DATA_MODEL.md](../docs/DATA_MODEL.md) — модели миссии, поля, объектов, платформы и событий.
 - [../docs/GAME_SCENARIOS.md](../docs/GAME_SCENARIOS.md) — сценарии, которые бэкенд должен поддержать.

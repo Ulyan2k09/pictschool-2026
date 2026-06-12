@@ -8,7 +8,7 @@
 - Есть стартовая карта, цель, минимум один объект и минимум одно задание.
 - `GET /api/mission` возвращает состояние миссии.
 - `POST /api/mission/start` запускает прогон.
-- `POST /api/player/command` принимает команду игрока.
+- `POST /api/player/command` принимает команду игрока `up`, `down`, `left` или `right`.
 - `POST /api/ai/action` принимает действие ИИ.
 - `GET /api/events` возвращает журнал событий.
 - `POST /api/mission/reset` возвращает систему к стартовым условиям.

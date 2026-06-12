@@ -12,6 +12,7 @@
 ## Документация для реализации
 
 - [../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) — место ИИ-агента в общей системе.
+- [../docs/BACKEND_AI_DESIGN.md](../docs/BACKEND_AI_DESIGN.md) — вход/выход агента, стратегия MVP, лимиты и порядок вызова из backend.
 - [../docs/DATA_MODEL.md](../docs/DATA_MODEL.md) — состояние миссии, поля, объектов и формат `AIAction`.
 - [../docs/API.md](../docs/API.md) — endpoint `POST /api/ai/action` и realtime-события ИИ.
 - [../docs/GAME_SCENARIOS.md](../docs/GAME_SCENARIOS.md) — сценарии, где агент передвигает объекты и блокирует маршрут.
