@@ -2,6 +2,45 @@
 
 Цель трека — собрать надежную логику игры: состояние миссии, поле, объекты, события, правила, очки, таймеры и обмен данными между ИИ, мобильным приложением и платформой. Бэкенд должен быть центром системы, где видно, что происходит и почему.
 
+## Локальный запуск MVP
+
+Backend реализован как отдельный Kotlin/Gradle-проект на Ktor.
+
+```bash
+cd backend
+./gradlew run
+```
+
+По умолчанию HTTP API поднимается на `http://localhost:8080`.
+
+Конфиг TCP-интеграции с симуляцией:
+
+```bash
+SIM_TCP_HOST=127.0.0.1
+SIM_TCP_COMMAND_PORT=5055
+SIM_TCP_TELEMETRY_PORT=5056
+```
+
+Порт `5055` используется для отправки строки команд вида `1 2 3 4`. Порт `5056` зарезервирован под будущую телеметрию от симуляции.
+
+Минимальная проверка:
+
+```bash
+curl -X POST http://localhost:8080/api/round/start \
+  -H 'Content-Type: application/json' \
+  -d '{"scenarioId":"default"}'
+
+curl -X POST http://localhost:8080/api/turn/submit \
+  -H 'Content-Type: application/json' \
+  -d '{"actor":"robot","commands":[1,1,3,1,4]}'
+
+curl http://localhost:8080/api/round
+curl http://localhost:8080/api/events
+curl -N http://localhost:8080/api/live
+```
+
+Если на `SIM_TCP_COMMAND_PORT` не запущена симуляция, корректная команда вернет `simulation_error`, а в журнале появится `turn.failed`.
+
 ## Что должно быть в MVP
 
 - API или realtime-канал для мобильного приложения.
