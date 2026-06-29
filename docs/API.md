@@ -1,24 +1,46 @@
 # API MVP
 
-Документ фиксирует минимальный контракт между `mobile`, `backend`, `ai` и `computer-systems`. Конкретный стек не задается: REST и realtime-канал можно реализовать на любом фреймворке.
+Документ фиксирует обновленный минимальный контракт между `mobile`, `backend` и `simulation`.
 
 ## Общие правила
 
 - Все REST-запросы и ответы используют JSON.
-- Бэкенд является единственным источником правды.
+- Backend является единственным источником правды.
 - Любое важное изменение состояния публикуется как событие и попадает в журнал.
-- `GET /api/live` может быть WebSocket или SSE, но формат событий должен быть одинаковым.
+- Команды движения передаются в симуляцию **не через REST**, а через TCP-строку байт на `localhost`.
+
+## TCP-контракт backend -> simulation
+
+Параметры фиксируются в конфиге backend:
+
+- `SIM_TCP_HOST=127.0.0.1`
+- `SIM_TCP_COMMAND_PORT=5055`
+- `SIM_TCP_TELEMETRY_PORT=5056` (зарезервирован на будущее)
+
+Формат сообщения:
+
+```text
+1 2 3 4
+```
+
+Коды:
+
+- `1` — клетка вперед;
+- `2` — клетка назад;
+- `3` — поворот на 90 градусов влево;
+- `4` — поворот на 90 градусов вправо.
+
+Для MVP backend отправляет одну строку на ход (до `5` команд, разделитель пробел).
 
 ## Формат ошибки
 
 ```json
 {
   "error": {
-    "code": "path_blocked",
-    "message": "Команда невозможна: путь перекрыт объектом box-1.",
+    "code": "unknown_command",
+    "message": "Команда 7 не поддерживается.",
     "details": {
-      "objectId": "box-1",
-      "position": { "x": 4, "y": 2 }
+      "allowed": [1, 2, 3, 4]
     }
   }
 }
@@ -26,166 +48,40 @@
 
 Минимальные коды ошибок:
 
-- `path_blocked` — движение невозможно, путь закрыт объектом или препятствием.
-- `invalid_object_move` — ИИ пытается переместить объект в недопустимую позицию.
-- `mission_not_running` — команда пришла до старта или после завершения миссии.
-- `platform_error` — платформа или симуляция вернула ошибку выполнения.
-- `unknown_command` — команда игрока или платформы не поддерживается.
+- `unknown_command` — команда не поддерживается;
+- `turn_limit_exceeded` — в ходе больше 5 команд;
+- `wrong_actor_turn` — команда пришла не от активного участника;
+- `round_not_running` — команда пришла вне активного раунда;
+- `simulation_error` — симуляция вернула ошибку выполнения.
 
 ## REST endpoints
 
-### `GET /api/mission`
+### `GET /api/round`
 
-Получить текущее состояние миссии.
+Получить текущее состояние раунда.
 
 Ответ `200`:
 
 ```json
 {
-  "mission": {
-    "id": "mission-1",
-    "status": "planning",
-    "score": 120,
-    "timeLeftSec": 480,
-    "currentTaskId": "task-2",
-    "field": {
-      "width": 8,
-      "height": 6,
-      "objects": [
-        {
-          "id": "box-1",
-          "type": "movable_block",
-          "position": { "x": 4, "y": 2 },
-          "state": "blocking"
-        }
-      ]
+  "round": {
+    "id": "round-1",
+    "status": "running",
+    "activeActor": "robot",
+    "turnNumber": 4,
+    "moveLimitPerTurn": 5,
+    "score": {
+      "robot": 3,
+      "agent": 2
     },
-    "platform": {
-      "id": "platform-1",
-      "position": { "x": 1, "y": 0 },
-      "status": "ready",
-      "commandQueue": [],
-      "currentCommandIndex": 0,
-      "error": null
-    }
+    "ducksLeft": 5
   }
 }
 ```
 
-Ошибки: `mission_not_running`, если MVP решит скрывать состояние до старта. Рекомендуемый вариант для кураторов: возвращать состояние и при `idle`, чтобы приложение можно было отлаживать до запуска.
+### `POST /api/round/start`
 
-### `POST /api/mission/start`
-
-Запустить или перезапустить миссию.
-
-Запрос:
-
-```json
-{
-  "scenarioId": "default",
-  "teamId": "team-1"
-}
-```
-
-Ответ `201`:
-
-```json
-{
-  "missionId": "mission-1",
-  "status": "planning"
-}
-```
-
-Событие: `mission.started`.
-
-Ошибки: `platform_error`, если платформа или симуляция не готова.
-
-### `POST /api/player/plan`
-
-Отправить план движения (массив команд) платформе.
-
-Запрос:
-
-```json
-{
-  "commands": ["up", "up", "right", "down"]
-}
-```
-
-Допустимые значения в массиве `commands`: `up`, `down`, `left`, `right`. Бэкенд переводит сессию в статус `executing` и начинает пошаговое выполнение. Если симуляция использует команды вроде `move_forward` и `turn_left`, этот перевод выполняется внутри platform / simulation adapter.
-
-Ответ `202`:
-
-```json
-{
-  "accepted": true,
-  "eventId": "event-17",
-  "platformStatus": "executing"
-}
-```
-
-События: `player.plan_submitted`, затем серия `platform.updated` и событий ИИ.
-
-Ошибки: `mission_not_in_planning`, `unknown_command`.
-
-### `POST /api/ai/action`
-
-Принять действие ИИ-агента.
-
-Запрос:
-
-```json
-{
-  "type": "move_object",
-  "targetObjectId": "box-1",
-  "from": { "x": 2, "y": 2 },
-  "to": { "x": 4, "y": 2 },
-  "reason": "player_is_using_short_route"
-}
-```
-
-Ответ `202`:
-
-```json
-{
-  "accepted": true,
-  "eventId": "event-42",
-  "result": "object_moved"
-}
-```
-
-События: `ai.object_moved`, `ai.path_blocked`, если действие закрыло маршрут.
-
-Ошибки: `mission_not_running`, `invalid_object_move`.
-
-### `GET /api/events`
-
-Получить журнал событий текущей миссии.
-
-Ответ `200`:
-
-```json
-{
-  "events": [
-    {
-      "id": "event-42",
-      "type": "ai.object_moved",
-      "timestamp": "2026-07-05T10:15:30Z",
-      "payload": {
-        "objectId": "box-1",
-        "from": { "x": 2, "y": 2 },
-        "to": { "x": 4, "y": 2 }
-      }
-    }
-  ]
-}
-```
-
-Ошибки: для MVP не обязательны. Если журнала нет, возвращается пустой массив.
-
-### `POST /api/mission/reset`
-
-Сбросить миссию для нового прогона.
+Запустить новый раунд.
 
 Запрос:
 
@@ -195,17 +91,77 @@
 }
 ```
 
+Ответ `201`:
+
+```json
+{
+  "roundId": "round-1",
+  "status": "running",
+  "activeActor": "robot"
+}
+```
+
+### `POST /api/turn/submit`
+
+Отправить пакет команд текущего участника (до 5 команд).
+
+Запрос:
+
+```json
+{
+  "actor": "robot",
+  "commands": [1, 1, 3, 1, 4]
+}
+```
+
+Ответ `202`:
+
+```json
+{
+  "accepted": true,
+  "eventId": "event-17",
+  "forwardedAs": "1 1 3 1 4"
+}
+```
+
+События: `turn.submitted`, `simulation.command_sent`, `actor.moved`, `turn.completed`.
+
+### `GET /api/events`
+
+Получить журнал событий текущего раунда.
+
 Ответ `200`:
 
 ```json
 {
-  "missionId": "mission-1",
+  "events": [
+    {
+      "id": "event-17",
+      "type": "simulation.command_sent",
+      "timestamp": "2026-06-22T19:50:30Z",
+      "payload": {
+        "actor": "robot",
+        "tcpPayload": "1 1 3 1 4",
+        "port": 5055
+      }
+    }
+  ]
+}
+```
+
+### `POST /api/round/reset`
+
+Сбросить раунд к стартовым условиям.
+
+Ответ `200`:
+
+```json
+{
+  "roundId": "round-1",
   "status": "idle",
   "readyForStart": true
 }
 ```
-
-Ошибки: `platform_error`, если платформа не смогла перейти в безопасное стартовое состояние.
 
 ## Realtime endpoint
 
@@ -217,32 +173,34 @@
 
 ```json
 {
-  "type": "platform.updated",
-  "timestamp": "2026-07-05T10:15:35Z",
+  "type": "duck.collected",
+  "timestamp": "2026-06-22T19:52:10Z",
   "payload": {
-    "position": { "x": 2, "y": 0 },
-    "status": "moving",
-    "error": null
+    "actor": "agent",
+    "duckId": "duck-4",
+    "score": {
+      "robot": 3,
+      "agent": 3
+    }
   }
 }
 ```
 
 Обязательные события MVP:
 
-- `mission.started` — миссия запущена.
-- `player.plan_submitted` — игрок отправил план движения.
-- `plan.interrupted` — выполнение плана прервано (например, из-за препятствия).
-- `platform.updated` — платформа изменила позицию, статус или ошибку.
-- `ai.object_moved` — ИИ передвинул объект.
-- `ai.path_blocked` — ИИ заблокировал путь или зону.
-- `mission.scored` — изменились очки.
-- `mission.failed` — миссия провалена.
-- `mission.completed` — миссия завершена успешно.
+- `round.started`
+- `turn.submitted`
+- `simulation.command_sent`
+- `actor.moved`
+- `duck.collected`
+- `turn.completed`
+- `round.completed`
+- `round.reset`
 
 ## Минимальная проверка API
 
 - Каждый endpoint возвращает JSON.
-- Ошибки используют общий формат.
-- Команда игрока создает событие `player.commanded`.
-- Действие ИИ `move_object` создает `ai.object_moved`.
-- Блокировка пути видна как ошибка `path_blocked` и событие `ai.path_blocked`.
+- Команда хода ограничена 5 действиями.
+- Backend отправляет в симуляцию строку команд по TCP на `SIM_TCP_COMMAND_PORT`.
+- Ошибки используют единый формат.
+- При сборе последней уточки публикуется `round.completed`.

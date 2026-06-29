@@ -1,27 +1,43 @@
-# Backend и AI: проектный дизайн
+# Backend и Agent: проектный дизайн
 
-Документ фиксирует архитектуру backend и AI-части после обсуждения. Цель: дать команде понятный контракт, по которому можно сначала собрать локальную симуляцию, а затем заменить ее Webots или физическим устройством без переписывания игровой логики.
+Документ фиксирует обновленную архитектуру backend и игрового агента для режима "сбор уточек".
 
 ## Ключевое решение
 
-Бэкенд остается единственным источником правды. Игрок, ИИ-агент и симуляция не меняют состояние напрямую. Они отправляют намерения или результаты, а бэкенд валидирует их, применяет правила, пишет событие в журнал и публикует новое состояние.
+Backend отправляет движения в симуляцию строкой байт по TCP на `localhost`. Формат команд максимально простой:
 
-Игра делится на фазы планирования и выполнения.
+```text
+1 2 3 4
+```
+
+Где:
+
+- `1` — клетка вперед;
+- `2` — клетка назад;
+- `3` — поворот влево на 90 градусов;
+- `4` — поворот вправо на 90 градусов.
+
+Порт команд фиксируется в конфиге backend:
+
+- `SIM_TCP_HOST=127.0.0.1`
+- `SIM_TCP_COMMAND_PORT=5055`
+- `SIM_TCP_TELEMETRY_PORT=5056` (зарезервирован под обратный канал в будущем)
+
+## Игровой цикл
+
+В раунде участвуют два актера: `robot` и `agent`.  
+Они ходят по очереди, у каждого хода до `5` движений.
 
 Основной цикл:
 
-1. **Фаза планирования:** Игрок формирует маршрут и отправляет массив команд (план).
-2. Backend валидирует план и переводит сессию в статус `executing`.
-3. **Фаза выполнения (цикл по шагам плана):**
-   - Backend берет следующую команду из плана.
-   - Backend отправляет команду в simulation adapter.
-   - Simulation adapter возвращает результат движения.
-   - Backend обновляет состояние платформы и пишет событие.
-   - Backend вызывает AI agent со свежим снимком состояния.
-   - AI agent возвращает действие вмешательства (например, ставит препятствие).
-   - Backend применяет действие ИИ и пишет событие.
-   - Если робот уперся в препятствие (из-за ИИ или ошибки игрока), выполнение прерывается, план сбрасывается.
-4. После завершения или прерывания плана сессия возвращается в статус `planning`.
+1. Backend запускает раунд и назначает `activeActor`.
+2. Клиент отправляет `commands` для активного участника.
+3. Backend валидирует список команд (`1..4`, длина `1..5`).
+4. Backend формирует TCP-строку и отправляет ее в симуляцию.
+5. Симуляция исполняет команды и возвращает результат.
+6. Backend обновляет состояние, количество собранных уточек и публикует события.
+7. Ход переключается на другого участника.
+8. Раунд завершается, когда на поле не осталось уточек.
 
 ## Границы компонентов
 
@@ -29,22 +45,19 @@
 flowchart LR
     Client["Client"]
     API["Backend API"]
-    Game["Game Engine"]
+    Engine["Round Engine"]
     Store["State Store"]
     Events["Event Log"]
-    Agent["AI Agent"]
-    Sim["Simulation Adapter"]
-    Webots["Webots / Analog"]
+    Tcp["TCP Command Sender"]
+    Sim["Simulation"]
 
-    Client -->|command plan| API
-    API --> Game
-    Game --> Store
-    Game --> Events
-    Game -->|movement command| Sim
-    Sim -->|result| Game
-    Sim --> Webots
-    Game -->|state snapshot| Agent
-    Agent -->|AI action| Game
+    Client -->|turn commands| API
+    API --> Engine
+    Engine --> Store
+    Engine --> Events
+    Engine --> Tcp
+    Tcp -->|1 2 3 4| Sim
+    Sim -->|result| Engine
     API -->|state/events| Client
 ```
 
@@ -53,333 +66,155 @@ flowchart LR
 Минимальная структура backend:
 
 - `api` — HTTP endpoints и realtime-канал.
-- `domain` — модели `GameSession`, `Field`, `Player`, `Object`, `AIAction`, `GameEvent`.
-- `engine` — правила игры и применение команд.
-- `agent_client` — вызов ИИ-агента и обработка таймаутов.
-- `simulation` — интерфейс адаптера симуляции и конкретные реализации.
+- `domain` — модели `Round`, `ActorState`, `Duck`, `GameEvent`.
+- `engine` — правила раунда, очередность ходов и подсчет счета.
+- `tcp_client` — отправка строки команд в симуляцию.
+- `simulation` — контракт результата исполнения команды.
 - `storage` — хранение состояния и журнала событий.
-- `scenarios` — стартовые карты, объекты, задания и параметры баланса.
+- `scenarios` — стартовые позиции и раскладка уточек.
 
-На MVP можно хранить состояние in-memory или в одном JSON-файле. Важно не смешивать хранение с правилами: правила должны жить в `engine`, чтобы позже заменить хранилище на SQLite/PostgreSQL без изменения игрового цикла.
+## Agent модули
 
-## AI модули
+Если агент автономный (не только через UI), минимальная структура:
 
-Минимальная структура AI:
-
-- `policy` — стратегия выбора вмешательства.
-- `features` — извлечение признаков из состояния: позиция игрока, цель, короткий маршрут, свободные клетки, история ошибок.
-- `actions` — сборка валидных `AIAction`.
-- `limits` — ограничения честности: cooldown, максимум вмешательств, запрет полной блокировки.
-- `debug` — объяснение решения для журнала.
-
-На MVP агент может быть обычным Python-модулем внутри backend-процесса. Если времени хватает, его можно вынести в отдельный сервис с endpoint `POST /decide`. Контракт должен остаться одинаковым.
+- `policy` — выбор хода по текущему состоянию.
+- `encoder` — генерация массива команд `1..4`.
+- `limits` — ограничение до 5 движений за ход.
+- `debug` — пояснение выбора в журнале.
 
 ## Основные сущности
 
-### GameSession
-
-Прогон игры для одной команды.
+### Round
 
 Поля:
 
 - `id`
-- `teamId`
-- `scenarioId`
-- `status`: `idle`, `planning`, `executing`, `paused`, `failed`, `completed`
-- `field`
-- `player`
+- `status`: `idle`, `running`, `completed`, `failed`
+- `activeActor`: `robot` | `agent`
+- `turnNumber`
+- `moveLimitPerTurn` (для MVP фиксировано `5`)
+- `ducksLeft`
 - `score`
-- `timeLeftSec`
-- `turn`
-- `createdAt`
-- `updatedAt`
 
-### Field
-
-Сетка, по которой движется игрок или робот.
+### ActorState
 
 Поля:
 
-- `width`
-- `height`
-- `zones`
-- `obstacles`
-- `objects`
-- `goal`
-
-### Player
-
-Игровое представление платформы или робота.
-
-Поля:
-
-- `id`
+- `id`: `robot` | `agent`
 - `position`
 - `direction`
-- `status`: `ready`, `executing`, `blocked`, `error`, `recovering`
-- `commandQueue`
-- `currentCommandIndex`
-- `error`
+- `collectedDucks`
+- `lastError`
 
-### GameObject
-
-Объект на поле.
+### Duck
 
 Поля:
 
 - `id`
-- `type`: `movable_block`, `task_item`, `obstacle`, `bonus`
 - `position`
-- `state`: `free`, `occupied`, `moving_by_ai`, `blocking`, `unavailable`
-- `movableByAi`
-
-### AIAction
-
-Намерение агента, которое backend обязан проверить.
-
-Поля:
-
-- `type`: `move_object`, `block_path`, `delay_command`, `disable_zone`, `noop`
-- `targetObjectId`
-- `from`
-- `to`
-- `reason`
-- `confidence`
+- `collectedBy`: `robot` | `agent` | `null`
 
 ### GameEvent
 
-Аудит всех важных изменений.
-
 Поля:
 
 - `id`
-- `sessionId`
-- `turn`
+- `roundId`
+- `turnNumber`
 - `type`
 - `timestamp`
-- `actor`: `player`, `backend`, `ai`, `simulation`
+- `actor`
 - `payload`
 
-## План игрока
+## Контракт команд для симуляции
 
-Для клиента фиксируем отправку массива направлений:
-
-```json
-{
-  "commands": ["up", "up", "right"]
-}
-```
-
-Допустимые значения: `up`, `down`, `left`, `right`.
-
-Backend пошагово переводит направления в целевые клетки:
-
-- `up`: `y - 1`
-- `down`: `y + 1`
-- `left`: `x - 1`
-- `right`: `x + 1`
-
-Если позже физический робот потребует `move_forward` и повороты, это остается внутренней задачей simulation adapter. Клиент и game engine продолжают работать с массивом сеточных направлений.
-
-## Интерфейс simulation adapter
-
-Backend не должен зависеть от Webots напрямую. Он работает с интерфейсом:
+На каждый ход backend отправляет одну строку:
 
 ```text
-reset(scenario) -> SimulationState
-apply_player_command(session, command) -> SimulationResult
-apply_environment_update(session, update) -> SimulationResult
-get_state() -> SimulationState
+1 1 3 1 4
 ```
 
-`SimulationResult`:
+Правила:
+
+- Команд в строке от `1` до `5`.
+- Разделитель — пробел.
+- Другие символы запрещены.
+- Пустая строка не отправляется.
+
+Пример результата от симуляции (минимум для MVP):
 
 ```json
 {
   "ok": true,
-  "position": { "x": 1, "y": 0 },
-  "status": "ready",
-  "error": null,
-  "raw": {}
-}
-```
-
-На первом этапе нужна `LocalGridSimulation`: она не требует Webots и проверяет правила на сетке. После этого добавляется `WebotsSimulationAdapter`, который переводит сеточные команды в API Webots.
-
-## Интерфейс AI agent
-
-Вход агента:
-
-```json
-{
-  "sessionId": "session-1",
-  "turn": 7,
-  "field": {},
-  "player": {},
-  "score": 80,
-  "timeLeftSec": 420,
-  "recentEvents": []
-}
-```
-
-Выход агента:
-
-```json
-{
-  "type": "move_object",
-  "targetObjectId": "box-1",
-  "from": { "x": 2, "y": 2 },
-  "to": { "x": 4, "y": 2 },
-  "reason": "player_is_using_short_route",
-  "confidence": 0.74
-}
-```
-
-Если агент не должен вмешиваться:
-
-```json
-{
-  "type": "noop",
-  "reason": "cooldown_active",
-  "confidence": 1.0
+  "actor": "robot",
+  "finalPosition": { "x": 3, "y": 1 },
+  "finalDirection": "E",
+  "ducksCollected": ["duck-2"],
+  "error": null
 }
 ```
 
 ## Правила валидации
 
-Backend отклоняет план игрока, если:
+Backend отклоняет ход, если:
 
-- сессия не в статусе `planning`;
-- массив команд пуст или содержит неизвестные команды.
+- раунд не в статусе `running`;
+- `actor` не совпадает с `activeActor`;
+- массив `commands` пуст;
+- в массиве есть код вне диапазона `1..4`;
+- длина массива больше `5`.
 
-Во время выполнения шага плана движение прерывается, если:
-- целевая клетка вне поля;
-- целевая клетка занята препятствием или объектом;
-- simulation adapter вернул `blocked` или `error`.
+Backend завершает ход с ошибкой `simulation_error`, если TCP-вызов завершился неуспешно или симуляция вернула ошибку.
 
-Backend отклоняет действие ИИ, если:
-
-- сессия не в статусе `executing`;
-- объект не существует или `movableByAi = false`;
-- `from` не совпадает с текущей позицией объекта;
-- `to` вне поля;
-- `to` занята игроком, препятствием или другим объектом;
-- действие полностью перекрывает все маршруты к цели;
-- превышен лимит вмешательств или активен cooldown.
-
-## Порядок выполнения плана
+## Псевдокод обработки хода
 
 ```text
-handle_player_plan(session_id, commands)
-  load session
-  validate mission is in 'planning' status
-  set session.status = 'executing'
-  set platform.commandQueue = commands
-  append player.plan_submitted
-  
-  for each command in commandQueue:
-    calculate target cell
-    if movement blocked:
-      append plan.interrupted
-      break loop
-      
-    call simulation.apply_player_command(command)
-    apply simulation result
-    append platform.updated
-    check score / task / completion
-    
-    build AI snapshot
-    call agent.decide(snapshot)
-    validate AI action
-    apply AI action or append ai.action_rejected
-    append AI event
-    
-    publish events to realtime channel
-    sleep(delay) // для визуализации на клиенте
-    
-  set session.status = 'planning'
-  clear platform.commandQueue
-  save session
+submit_turn(round_id, actor, commands)
+  load round
+  validate round is running
+  validate actor is activeActor
+  validate commands (1..4, max 5)
+
+  payload = join(commands, " ")
+  append turn.submitted
+  append simulation.command_sent(payload)
+
+  result = tcp.send(host, commandPort, payload)
+  if result.error:
+    append turn.failed
+    return error simulation_error
+
+  apply actor position/direction
+  apply duck collection
+  append actor.moved
+  append duck.collected (for each duck)
+
+  if ducksLeft == 0:
+    set round.status = completed
+    append round.completed
+  else:
+    switch activeActor
+    append turn.completed
+
+  save round
 ```
-
-Если simulation adapter отвечает долго, backend не должен зависать навсегда. Для MVP достаточно таймаута и события `platform.error`.
-
-## Минимальная стратегия AI
-
-Стартовая стратегия должна быть простой и объяснимой:
-
-1. Проверить cooldown. Если активен, вернуть `noop`.
-2. Найти кратчайший маршрут игрока до цели.
-3. Найти свободную клетку на этом маршруте, но не рядом со стартом и не на самой цели.
-4. Найти ближайший объект `movable_block`.
-5. Предложить `move_object` в найденную клетку.
-6. Если после перемещения маршрут пропадает полностью, выбрать другую клетку или вернуть `noop`.
-
-Такой агент уже выглядит осмысленным: он реагирует на маршрут, но не ломает игру полностью.
 
 ## События MVP
 
 Обязательные события:
 
-- `mission.started`
-- `mission.reset`
-- `player.plan_submitted`
-- `player.plan_rejected`
-- `plan.interrupted`
-- `platform.updated`
-- `ai.decided`
-- `ai.noop`
-- `ai.action_rejected`
-- `ai.object_moved`
-- `ai.path_blocked`
-- `mission.scored`
-- `mission.completed`
-- `mission.failed`
+- `round.started`
+- `turn.submitted`
+- `simulation.command_sent`
+- `actor.moved`
+- `duck.collected`
+- `turn.completed`
+- `turn.failed`
+- `round.completed`
+- `round.reset`
 
-Каждое событие ИИ должно содержать `reason`, чтобы участники могли объяснить поведение агента.
+## Открытые решения (на потом)
 
-## Поэтапная реализация
-
-### Этап A. Backend без Webots
-
-- Создать модели состояния.
-- Реализовать in-memory storage.
-- Реализовать `LocalGridSimulation`.
-- Реализовать endpoints `start`, `mission`, `player/command`, `events`, `reset`.
-- Добавить журнал событий.
-
-### Этап B. AI как локальная стратегия
-
-- Создать `agent.decide(snapshot)`.
-- Реализовать `noop` и `move_object`.
-- Добавить cooldown и проверку маршрута до цели.
-- Подключить вызов агента после каждого шага в плане игрока.
-
-### Этап C. Контракт с Webots
-
-- Зафиксировать `SimulationAdapter`.
-- Реализовать заглушку `WebotsSimulationAdapter`.
-- Описать соответствие сеточных координат и координат Webots.
-- Подключить reset и базовое движение.
-
-### Этап D. Realtime и отладка
-
-- Добавить SSE или WebSocket.
-- Публиковать события после каждого изменения.
-- Сделать debug endpoint или режим логов для объяснения решений AI.
-
-## Что можно поручить участникам
-
-- Изменить стратегию выбора клетки для блокировки.
-- Добавить новый тип объекта.
-- Настроить лимиты вмешательств ИИ.
-- Изменить систему очков и штрафов.
-- Добавить новый сценарий поля.
-- Реализовать новый simulation adapter.
-- Улучшить обработку ошибок платформы.
-
-## Открытые решения
-
-- Webots или аналог выбирается в треке `computer-systems`, но backend уже должен работать через adapter.
-- Хранилище для MVP можно оставить in-memory; если нужен replay между запусками, выбрать SQLite.
-- Realtime-канал можно сделать SSE, если нужен самый быстрый путь для MVP, или WebSocket, если клиенту нужны двусторонние события.
+- Обратный канал из симуляции в backend по отдельному TCP-порту `SIM_TCP_TELEMETRY_PORT`.
+- Расширение телеметрии: позиция по каждому шагу, статусы `error/completed`, диагностические коды.
+- Выбор постоянного хранилища (SQLite/PostgreSQL) вместо in-memory.

@@ -1,41 +1,42 @@
 # Модель данных MVP
 
-Документ описывает минимальные сущности, которые должны одинаково понимать все треки. Это не схема конкретной базы данных, а контракт состояния и сообщений.
+Документ задает единый контракт состояния для режима "agent + robot собирают уточек".
 
 ## Общие правила
 
-- Координата всегда задается как `{ "x": number, "y": number }`.
-- Бэкенд является единственным источником правды.
-- ИИ отправляет действие, но не меняет состояние напрямую.
-- Mobile App получает состояние от бэкенда и не хранит собственную версию правил.
-- Platform / Simulation возвращает результат движения, но не начисляет очки и не завершает миссию.
+- Координата задается как `{ "x": number, "y": number }`.
+- Backend является единственным источником правды.
+- В раунде два актера: `robot` и `agent`.
+- За ход разрешено максимум `5` команд движения.
+- Раунд завершается, когда собраны все уточки.
 
-## Mission
+## Round
 
 ```json
 {
-  "id": "mission-1",
-  "status": "planning",
-  "score": 120,
-  "timeLeftSec": 480,
-  "currentTaskId": "task-2",
-  "field": {},
-  "platform": {},
-  "eventsCount": 42
+  "id": "round-1",
+  "status": "running",
+  "turnNumber": 3,
+  "activeActor": "agent",
+  "moveLimitPerTurn": 5,
+  "ducksTotal": 8,
+  "ducksLeft": 3,
+  "score": {
+    "robot": 3,
+    "agent": 2
+  }
 }
 ```
 
 Обязательные поля:
 
-- `id` — идентификатор прогона.
-- `status` — состояние миссии.
-- `score` — текущие очки.
-- `timeLeftSec` — оставшееся время в секундах.
-- `currentTaskId` — текущее задание или `null`.
-- `field` — состояние поля.
-- `platform` — состояние платформы.
-
-Статусы: `idle`, `planning`, `executing`, `paused`, `failed`, `completed`.
+- `id` — идентификатор раунда.
+- `status` — `idle`, `running`, `completed`, `failed`.
+- `turnNumber` — номер текущего хода.
+- `activeActor` — кто ходит сейчас.
+- `moveLimitPerTurn` — лимит команд за ход.
+- `ducksTotal`, `ducksLeft` — прогресс раунда.
+- `score` — сколько уточек собрал каждый участник.
 
 ## Field
 
@@ -43,114 +44,120 @@
 {
   "width": 8,
   "height": 6,
-  "zones": [
-    { "id": "start", "type": "safe", "cells": [{ "x": 0, "y": 0 }] },
-    { "id": "goal", "type": "target", "cells": [{ "x": 7, "y": 5 }] }
-  ],
   "obstacles": [
     { "id": "wall-1", "position": { "x": 3, "y": 2 } }
   ],
-  "objects": []
+  "ducks": [
+    { "id": "duck-1", "position": { "x": 1, "y": 4 }, "collectedBy": null }
+  ]
 }
 ```
 
 Обязательные поля:
 
-- `width`, `height` — размер поля.
-- `zones` — специальные зоны: старт, цель, опасная зона, закрытая зона.
+- `width`, `height` — размер сетки.
 - `obstacles` — постоянные препятствия.
-- `objects` — перемещаемые или интерактивные объекты.
+- `ducks` — уточки на поле.
 
-Для MVP поле считается сеткой. Если физическая платформа использует реальные координаты, адаптер платформы переводит их в сетку для бэкенда.
-
-## Object
+## ActorState
 
 ```json
 {
-  "id": "box-1",
-  "type": "movable_block",
-  "position": { "x": 4, "y": 2 },
-  "state": "blocking"
+  "id": "robot",
+  "position": { "x": 0, "y": 0 },
+  "direction": "N",
+  "collectedDucks": 3,
+  "lastError": null
 }
 ```
 
 Обязательные поля:
 
-- `id` — уникальный идентификатор объекта.
-- `type` — тип объекта.
-- `position` — текущая координата.
-- `state` — состояние объекта.
+- `id` — `robot` или `agent`.
+- `position` — текущая позиция.
+- `direction` — `N`, `E`, `S`, `W`.
+- `collectedDucks` — текущий счет участника.
+- `lastError` — последняя ошибка или `null`.
 
-Типы для MVP: `movable_block`, `task_item`, `obstacle`, `bonus`.
-
-Состояния: `free`, `occupied`, `moving_by_ai`, `blocking`, `unavailable`.
-
-## Platform
+## TurnCommandRequest
 
 ```json
 {
-  "id": "platform-1",
-  "position": { "x": 1, "y": 0 },
-  "status": "ready",
-  "commandQueue": ["up", "right"],
-  "currentCommandIndex": 0,
+  "actor": "robot",
+  "commands": [1, 1, 3, 1, 4]
+}
+```
+
+Поля:
+
+- `actor` — активный участник, отправляющий ход.
+- `commands` — массив целых кодов.
+
+Допустимые коды:
+
+- `1` — клетка вперед;
+- `2` — клетка назад;
+- `3` — поворот влево на 90 градусов;
+- `4` — поворот вправо на 90 градусов.
+
+Ограничения:
+
+- длина `commands`: `1..5`;
+- другие коды запрещены.
+
+## TcpCommandPayload
+
+Строка, которую backend отправляет в симуляцию:
+
+```text
+1 1 3 1 4
+```
+
+Параметры передачи задаются конфигом:
+
+- `SIM_TCP_HOST` (для MVP `127.0.0.1`)
+- `SIM_TCP_COMMAND_PORT` (для MVP `5055`)
+- `SIM_TCP_TELEMETRY_PORT` (резерв, для MVP `5056`)
+
+## SimulationResult
+
+```json
+{
+  "ok": true,
+  "actor": "robot",
+  "finalPosition": { "x": 3, "y": 1 },
+  "finalDirection": "E",
+  "ducksCollected": ["duck-2"],
   "error": null
 }
 ```
 
 Обязательные поля:
 
-- `id` — идентификатор платформы или симуляции.
-- `position` — текущая координата.
-- `status` — состояние выполнения.
-- `commandQueue` — массив оставшихся команд плана.
-- `currentCommandIndex` — индекс текущей выполняемой команды.
-- `error` — последняя ошибка или `null`.
-
-Статусы: `ready`, `executing`, `blocked`, `error`, `recovering`.
-
-## AIAction
-
-```json
-{
-  "type": "move_object",
-  "targetObjectId": "box-1",
-  "from": { "x": 2, "y": 2 },
-  "to": { "x": 4, "y": 2 },
-  "reason": "player_is_using_short_route"
-}
-```
-
-Обязательные поля:
-
-- `type` — тип действия ИИ.
-- `targetObjectId` — объект, если действие связано с объектом.
-- `from` — исходная позиция, если применимо.
-- `to` — новая позиция, если применимо.
-- `reason` — короткое машинное объяснение решения.
-
-Типы действий: `move_object`, `block_path`, `change_route`, `delay_command`, `disable_zone`.
+- `ok` — признак успешного исполнения.
+- `actor` — кто выполнял ход.
+- `finalPosition`, `finalDirection` — итог после команд.
+- `ducksCollected` — список собранных уточек за ход.
+- `error` — описание ошибки или `null`.
 
 ## GameEvent
 
 ```json
 {
   "id": "event-42",
-  "type": "ai.object_moved",
-  "timestamp": "2026-07-05T10:15:30Z",
+  "type": "duck.collected",
+  "timestamp": "2026-06-22T19:52:10Z",
   "payload": {
-    "objectId": "box-1",
-    "from": { "x": 2, "y": 2 },
-    "to": { "x": 4, "y": 2 }
+    "actor": "agent",
+    "duckId": "duck-4",
+    "score": { "robot": 3, "agent": 3 }
   }
 }
 ```
 
 Обязательные поля:
 
-- `id` — уникальный идентификатор события.
-- `type` — тип события.
-- `timestamp` — время события в ISO-формате.
+- `id` — уникальный идентификатор события;
+- `type` — тип события;
+- `timestamp` — ISO-время;
 - `payload` — данные события.
-
-Журнал событий должен объяснять ход миссии: кто отправил команду, что сделал ИИ, почему движение стало невозможным, как изменилась платформа и чем закончился прогон.
