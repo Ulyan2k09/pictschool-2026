@@ -14,6 +14,7 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.response.respondTextWriter
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -47,6 +48,17 @@ fun Application.backendModule(
     val engine = RoundEngine(store, tcpSender, config)
 
     routing {
+        get("/api/docs") {
+            call.respondText(swaggerHtml(), ContentType.Text.Html)
+        }
+
+        get("/api/docs/openapi.yaml") {
+            val spec = requireNotNull({}.javaClass.getResource("/openapi.yaml")) {
+                "openapi.yaml resource is missing"
+            }.readText()
+            call.respondText(spec, ContentType.parse("application/yaml"))
+        }
+
         get("/api/round") {
             call.respond(RoundResponse(store.snapshot()))
         }
@@ -97,6 +109,29 @@ fun Application.backendModule(
         }
     }
 }
+
+private fun swaggerHtml(): String = """
+    <!doctype html>
+    <html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <title>Duck Round Backend API</title>
+        <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+    </head>
+    <body>
+        <div id="swagger-ui"></div>
+        <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+        <script>
+            window.onload = () => {
+                window.ui = SwaggerUIBundle({
+                    url: '/api/docs/openapi.yaml',
+                    dom_id: '#swagger-ui'
+                });
+            };
+        </script>
+    </body>
+    </html>
+""".trimIndent()
 
 private suspend fun ApplicationCall.respondError(error: ApiError) {
     val status = when (error.code) {

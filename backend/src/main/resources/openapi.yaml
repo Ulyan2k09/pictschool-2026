@@ -1,0 +1,411 @@
+openapi: 3.0.3
+info:
+  title: Duck Round Backend API
+  version: 0.1.0
+  description: |
+    Backend MVP для раунда, где robot и agent по очереди собирают уточек.
+    Backend хранит состояние раунда, валидирует ходы и отправляет команды движения
+    строкой байт в симуляцию по TCP на localhost.
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+tags:
+  - name: docs
+    description: Swagger и OpenAPI спецификация
+  - name: round
+    description: Управление состоянием раунда
+  - name: turns
+    description: Отправка ходов участников
+  - name: events
+    description: Журнал и realtime-события
+paths:
+  /api/docs:
+    get:
+      tags: [docs]
+      summary: Swagger UI
+      description: HTML-страница Swagger UI, которая загружает `/api/docs/openapi.yaml`.
+      responses:
+        "200":
+          description: Swagger UI page
+          content:
+            text/html:
+              schema:
+                type: string
+  /api/docs/openapi.yaml:
+    get:
+      tags: [docs]
+      summary: OpenAPI YAML
+      description: Машиночитаемая спецификация API.
+      responses:
+        "200":
+          description: OpenAPI document
+          content:
+            application/yaml:
+              schema:
+                type: string
+  /api/round:
+    get:
+      tags: [round]
+      summary: Получить текущее состояние раунда
+      responses:
+        "200":
+          description: Current round state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoundResponse"
+  /api/round/start:
+    post:
+      tags: [round]
+      summary: Запустить новый раунд
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartRoundRequest"
+            example:
+              scenarioId: default
+      responses:
+        "201":
+          description: Round started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StartRoundResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /api/turn/submit:
+    post:
+      tags: [turns]
+      summary: Отправить ход активного участника
+      description: |
+        Принимает от 1 до 5 команд. Валидные команды: 1, 2, 3, 4.
+        После валидации backend отправляет строку вида `1 1 3 1 4`
+        в симуляцию по TCP на `SIM_TCP_HOST:SIM_TCP_COMMAND_PORT`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TurnCommandRequest"
+            example:
+              actor: robot
+              commands: [1, 1, 3, 1, 4]
+      responses:
+        "202":
+          description: Turn accepted and forwarded to simulation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurnAcceptedResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "502":
+          $ref: "#/components/responses/SimulationError"
+  /api/events:
+    get:
+      tags: [events]
+      summary: Получить журнал событий
+      responses:
+        "200":
+          description: Event log
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventsResponse"
+  /api/live:
+    get:
+      tags: [events]
+      summary: Подписаться на live-события
+      description: |
+        Server-Sent Events поток. Каждое событие содержит тип в поле `event`
+        и JSON-представление GameEvent в поле `data`.
+      responses:
+        "200":
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+  /api/round/reset:
+    post:
+      tags: [round]
+      summary: Сбросить раунд в idle
+      responses:
+        "200":
+          description: Round reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResetRoundResponse"
+components:
+  responses:
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    SimulationError:
+      description: Simulation TCP call failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    StartRoundRequest:
+      type: object
+      properties:
+        scenarioId:
+          type: string
+          nullable: true
+          default: default
+    StartRoundResponse:
+      type: object
+      required: [roundId, status, activeActor]
+      properties:
+        roundId:
+          type: string
+          example: round-1
+        status:
+          $ref: "#/components/schemas/RoundStatus"
+        activeActor:
+          $ref: "#/components/schemas/ActorId"
+    TurnCommandRequest:
+      type: object
+      required: [actor, commands]
+      properties:
+        actor:
+          $ref: "#/components/schemas/ActorId"
+        commands:
+          type: array
+          minItems: 1
+          maxItems: 5
+          items:
+            type: integer
+            enum: [1, 2, 3, 4]
+          description: "1 forward, 2 backward, 3 turn left, 4 turn right"
+    TurnAcceptedResponse:
+      type: object
+      required: [accepted, eventId, forwardedAs]
+      properties:
+        accepted:
+          type: boolean
+          example: true
+        eventId:
+          type: string
+          example: event-17
+        forwardedAs:
+          type: string
+          example: "1 1 3 1 4"
+    RoundResponse:
+      type: object
+      required: [round]
+      properties:
+        round:
+          $ref: "#/components/schemas/Round"
+    EventsResponse:
+      type: object
+      required: [events]
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/GameEvent"
+    ResetRoundResponse:
+      type: object
+      required: [roundId, status, readyForStart]
+      properties:
+        roundId:
+          type: string
+          example: round-1
+        status:
+          $ref: "#/components/schemas/RoundStatus"
+        readyForStart:
+          type: boolean
+          example: true
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          $ref: "#/components/schemas/ApiError"
+    ApiError:
+      type: object
+      required: [code, message, details]
+      properties:
+        code:
+          type: string
+          enum:
+            - unknown_command
+            - turn_limit_exceeded
+            - wrong_actor_turn
+            - round_not_running
+            - simulation_error
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+    Round:
+      type: object
+      required:
+        - id
+        - status
+        - activeActor
+        - turnNumber
+        - moveLimitPerTurn
+        - ducksTotal
+        - ducksLeft
+        - score
+        - field
+        - actors
+      properties:
+        id:
+          type: string
+          example: round-1
+        status:
+          $ref: "#/components/schemas/RoundStatus"
+        activeActor:
+          $ref: "#/components/schemas/ActorId"
+        turnNumber:
+          type: integer
+          example: 1
+        moveLimitPerTurn:
+          type: integer
+          example: 5
+        ducksTotal:
+          type: integer
+          example: 8
+        ducksLeft:
+          type: integer
+          example: 8
+        score:
+          $ref: "#/components/schemas/Score"
+        field:
+          $ref: "#/components/schemas/Field"
+        actors:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/ActorState"
+    Field:
+      type: object
+      required: [width, height, obstacles, ducks]
+      properties:
+        width:
+          type: integer
+          example: 8
+        height:
+          type: integer
+          example: 6
+        obstacles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Obstacle"
+        ducks:
+          type: array
+          items:
+            $ref: "#/components/schemas/Duck"
+    Obstacle:
+      type: object
+      required: [id, position]
+      properties:
+        id:
+          type: string
+          example: wall-1
+        position:
+          $ref: "#/components/schemas/Position"
+    Duck:
+      type: object
+      required: [id, position]
+      properties:
+        id:
+          type: string
+          example: duck-1
+        position:
+          $ref: "#/components/schemas/Position"
+        collectedBy:
+          $ref: "#/components/schemas/NullableActorId"
+    ActorState:
+      type: object
+      required: [id, position, direction, collectedDucks]
+      properties:
+        id:
+          $ref: "#/components/schemas/ActorId"
+        position:
+          $ref: "#/components/schemas/Position"
+        direction:
+          $ref: "#/components/schemas/Direction"
+        collectedDucks:
+          type: integer
+          example: 0
+        lastError:
+          type: string
+          nullable: true
+    Position:
+      type: object
+      required: [x, y]
+      properties:
+        x:
+          type: integer
+          example: 0
+        y:
+          type: integer
+          example: 0
+    Score:
+      type: object
+      required: [robot, agent]
+      properties:
+        robot:
+          type: integer
+          example: 0
+        agent:
+          type: integer
+          example: 0
+    GameEvent:
+      type: object
+      required: [id, roundId, turnNumber, type, timestamp, payload]
+      properties:
+        id:
+          type: string
+          example: event-1
+        roundId:
+          type: string
+          example: round-1
+        turnNumber:
+          type: integer
+          example: 1
+        type:
+          type: string
+          enum:
+            - round.started
+            - turn.submitted
+            - simulation.command_sent
+            - actor.moved
+            - duck.collected
+            - turn.completed
+            - turn.failed
+            - round.completed
+            - round.reset
+        timestamp:
+          type: string
+          format: date-time
+        actor:
+          $ref: "#/components/schemas/NullableActorId"
+        payload:
+          type: object
+          additionalProperties: true
+    ActorId:
+      type: string
+      enum: [robot, agent]
+    NullableActorId:
+      type: string
+      nullable: true
+      enum: [robot, agent]
+    Direction:
+      type: string
+      enum: [N, E, S, W]
+    RoundStatus:
+      type: string
+      enum: [idle, running, completed, failed]

@@ -13,6 +13,12 @@ cd backend
 
 По умолчанию HTTP API поднимается на `http://localhost:8080`.
 
+Swagger UI доступен на `http://localhost:8080/api/docs`.
+
+OpenAPI YAML доступен на `http://localhost:8080/api/docs/openapi.yaml`.
+
+Подробное описание реализованного функционала находится в [FUNCTIONALITY.md](FUNCTIONALITY.md).
+
 Конфиг TCP-интеграции с симуляцией:
 
 ```bash

@@ -13,6 +13,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ApplicationTest {
     @Test
@@ -41,5 +42,24 @@ class ApplicationTest {
         val roundJson = Json.parseToJsonElement(round.bodyAsText()).jsonObject.getValue("round").jsonObject
         assertEquals("running", roundJson.getValue("status").jsonPrimitive.content)
         assertEquals("agent", roundJson.getValue("activeActor").jsonPrimitive.content)
+    }
+
+    @Test
+    fun `swagger docs and openapi spec are exposed`() = testApplication {
+        application {
+            backendModule(tcpSender = object : TcpCommandSender {
+                override fun send(payload: String): Result<Unit> = Result.success(Unit)
+            })
+        }
+
+        val docs = client.get("/api/docs")
+        assertEquals(HttpStatusCode.OK, docs.status)
+        assertTrue(docs.bodyAsText().contains("SwaggerUIBundle"))
+
+        val openApi = client.get("/api/docs/openapi.yaml")
+        assertEquals(HttpStatusCode.OK, openApi.status)
+        val body = openApi.bodyAsText()
+        assertTrue(body.contains("openapi: 3.0.3"))
+        assertTrue(body.contains("/api/turn/submit:"))
     }
 }
