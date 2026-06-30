@@ -19,6 +19,8 @@ OpenAPI YAML доступен на `http://localhost:8080/api/docs/openapi.yaml`
 
 Подробное описание реализованного функционала находится в [FUNCTIONALITY.md](FUNCTIONALITY.md).
 
+Мини-инструкция по подготовке ноутбука для школьников находится в [STUDENT_SETUP.md](STUDENT_SETUP.md).
+
 Конфиг TCP-интеграции с симуляцией:
 
 ```bash
