@@ -24,6 +24,28 @@
   "score": {
     "robot": 3,
     "agent": 2
+  },
+  "field": {
+    "width": 8,
+    "height": 6,
+    "obstacles": [],
+    "ducks": []
+  },
+  "actors": {
+    "robot": {
+      "id": "robot",
+      "position": { "x": 0, "y": 0 },
+      "direction": "E",
+      "collectedDucks": 3,
+      "lastError": null
+    },
+    "agent": {
+      "id": "agent",
+      "position": { "x": 7, "y": 5 },
+      "direction": "W",
+      "collectedDucks": 2,
+      "lastError": null
+    }
   }
 }
 ```
@@ -37,6 +59,8 @@
 - `moveLimitPerTurn` — лимит команд за ход.
 - `ducksTotal`, `ducksLeft` — прогресс раунда.
 - `score` — сколько уточек собрал каждый участник.
+- `field` — текущее состояние поля, препятствий и уточек.
+- `actors` — текущее состояние участников (`robot`, `agent`).
 
 ## Field
 
@@ -145,6 +169,9 @@
 ```json
 {
   "id": "event-42",
+  "roundId": "round-1",
+  "turnNumber": 7,
+  "actor": "agent",
   "type": "duck.collected",
   "timestamp": "2026-06-22T19:52:10Z",
   "payload": {
@@ -158,6 +185,9 @@
 Обязательные поля:
 
 - `id` — уникальный идентификатор события;
+- `roundId` — идентификатор раунда;
+- `turnNumber` — номер хода, в котором произошло событие;
+- `actor` — участник события (`robot`, `agent`) или `null`;
 - `type` — тип события;
 - `timestamp` — ISO-время;
 - `payload` — данные события.

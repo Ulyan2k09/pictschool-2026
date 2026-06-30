@@ -52,7 +52,7 @@
 - `turn_limit_exceeded` — в ходе больше 5 команд;
 - `wrong_actor_turn` — команда пришла не от активного участника;
 - `round_not_running` — команда пришла вне активного раунда;
-- `simulation_error` — симуляция вернула ошибку выполнения.
+- `simulation_error` — не удалось отправить TCP-команду в симуляцию.
 
 ## REST endpoints
 
@@ -167,23 +167,13 @@
 
 ### `GET /api/live`
 
-Канал live-обновлений через WebSocket или SSE.
+Канал live-обновлений через **SSE** (`text/event-stream`).
 
-Формат события:
+Формат сообщения:
 
-```json
-{
-  "type": "duck.collected",
-  "timestamp": "2026-06-22T19:52:10Z",
-  "payload": {
-    "actor": "agent",
-    "duckId": "duck-4",
-    "score": {
-      "robot": 3,
-      "agent": 3
-    }
-  }
-}
+```text
+event: duck.collected
+data: {"id":"event-42","roundId":"round-1","turnNumber":7,"type":"duck.collected","timestamp":"2026-06-22T19:52:10Z","actor":"agent","payload":{"actor":"agent","duckId":"duck-4","score":{"robot":3,"agent":3}}}
 ```
 
 Обязательные события MVP:
@@ -194,12 +184,13 @@
 - `actor.moved`
 - `duck.collected`
 - `turn.completed`
+- `turn.failed`
 - `round.completed`
 - `round.reset`
 
 ## Минимальная проверка API
 
-- Каждый endpoint возвращает JSON.
+- REST endpoint'ы возвращают JSON.
 - Команда хода ограничена 5 действиями.
 - Backend отправляет в симуляцию строку команд по TCP на `SIM_TCP_COMMAND_PORT`.
 - Ошибки используют единый формат.

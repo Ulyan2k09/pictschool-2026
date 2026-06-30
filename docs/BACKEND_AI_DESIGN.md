@@ -34,7 +34,7 @@ Backend отправляет движения в симуляцию строко
 2. Клиент отправляет `commands` для активного участника.
 3. Backend валидирует список команд (`1..4`, длина `1..5`).
 4. Backend формирует TCP-строку и отправляет ее в симуляцию.
-5. Симуляция исполняет команды и возвращает результат.
+5. Если TCP-отправка успешна, backend применяет движение локально по правилам поля.
 6. Backend обновляет состояние, количество собранных уточек и публикует события.
 7. Ход переключается на другого участника.
 8. Раунд завершается, когда на поле не осталось уточек.
@@ -69,7 +69,7 @@ flowchart LR
 - `domain` — модели `Round`, `ActorState`, `Duck`, `GameEvent`.
 - `engine` — правила раунда, очередность ходов и подсчет счета.
 - `tcp_client` — отправка строки команд в симуляцию.
-- `simulation` — контракт результата исполнения команды.
+- `simulation` — TCP-получатель команд движения.
 - `storage` — хранение состояния и журнала событий.
 - `scenarios` — стартовые позиции и раскладка уточек.
 
@@ -141,18 +141,7 @@ flowchart LR
 - Другие символы запрещены.
 - Пустая строка не отправляется.
 
-Пример результата от симуляции (минимум для MVP):
-
-```json
-{
-  "ok": true,
-  "actor": "robot",
-  "finalPosition": { "x": 3, "y": 1 },
-  "finalDirection": "E",
-  "ducksCollected": ["duck-2"],
-  "error": null
-}
-```
+В текущем MVP ответ от симуляции не парсится: backend проверяет успешность TCP-отправки и рассчитывает результат хода локально.
 
 ## Правила валидации
 
@@ -164,7 +153,7 @@ Backend отклоняет ход, если:
 - в массиве есть код вне диапазона `1..4`;
 - длина массива больше `5`.
 
-Backend завершает ход с ошибкой `simulation_error`, если TCP-вызов завершился неуспешно или симуляция вернула ошибку.
+Backend завершает ход с ошибкой `simulation_error`, если TCP-вызов завершился неуспешно.
 
 ## Псевдокод обработки хода
 
@@ -179,13 +168,13 @@ submit_turn(round_id, actor, commands)
   append turn.submitted
   append simulation.command_sent(payload)
 
-  result = tcp.send(host, commandPort, payload)
-  if result.error:
+  send_ok = tcp.send(host, commandPort, payload)
+  if !send_ok:
     append turn.failed
     return error simulation_error
 
-  apply actor position/direction
-  apply duck collection
+  apply actor position/direction locally
+  apply duck collection locally
   append actor.moved
   append duck.collected (for each duck)
 
