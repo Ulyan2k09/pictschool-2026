@@ -1,4 +1,13 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: "pictschool"
+      POSTGRES_USER: "pictschool"
+      POSTGRES_PASSWORD: "pictschool"
+    volumes:
+      - user_db:/var/lib/postgresql/data
+
   simulation:
     build:
       context: ..
@@ -16,9 +25,14 @@ services:
       SIM_TCP_HOST: "simulation"
       SIM_TCP_COMMAND_PORT: "5055"
       SIM_TCP_TELEMETRY_PORT: "5056"
+      AUTH_ENABLED: "true"
+      DATABASE_URL: "jdbc:postgresql://postgres:5432/pictschool"
+      DATABASE_USER: "pictschool"
+      DATABASE_PASSWORD: "pictschool"
     ports:
       - "8080:8080"
     depends_on:
+      - postgres
       - simulation
 
   ui:
@@ -31,4 +45,4 @@ services:
       - backend
 
 volumes:
-  user_db
+  user_db:

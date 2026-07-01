@@ -23,6 +23,20 @@
       </div>
     </section>
 
+    <section id="authPanel" class="auth-panel" aria-label="Authentication" hidden>
+      <div>
+        <h2>Account</h2>
+        <p id="authStatus">Login or register to play.</p>
+      </div>
+      <div class="auth-form">
+        <input id="authUsername" type="text" autocomplete="username" placeholder="username">
+        <input id="authPassword" type="password" autocomplete="current-password" placeholder="password">
+        <button id="loginButton" class="secondary-button" type="button">Login</button>
+        <button id="registerButton" class="primary-button" type="button">Register</button>
+        <button id="logoutButton" class="secondary-button" type="button" hidden>Logout</button>
+      </div>
+    </section>
+
     <section class="score-strip" aria-label="Round summary">
       <div>
         <span>Turn</span>

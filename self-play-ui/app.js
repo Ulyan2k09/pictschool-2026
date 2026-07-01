@@ -5,6 +5,9 @@ const state = {
   queue: [],
   source: null,
   agentAutoBusy: false,
+  authEnabled: false,
+  token: localStorage.getItem("duckSelfPlayToken") || "",
+  username: localStorage.getItem("duckSelfPlayUsername") || "",
 };
 
 const els = {
@@ -28,6 +31,13 @@ const els = {
   submitButton: document.getElementById("submitButton"),
   messageBox: document.getElementById("messageBox"),
   eventLog: document.getElementById("eventLog"),
+  authPanel: document.getElementById("authPanel"),
+  authStatus: document.getElementById("authStatus"),
+  authUsername: document.getElementById("authUsername"),
+  authPassword: document.getElementById("authPassword"),
+  loginButton: document.getElementById("loginButton"),
+  registerButton: document.getElementById("registerButton"),
+  logoutButton: document.getElementById("logoutButton"),
 };
 
 els.backendUrl.value = state.backendUrl;
@@ -40,18 +50,35 @@ const commandLabels = {
 };
 
 function api(path, options = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+  if (state.token) {
+    headers.Authorization = `Bearer ${state.token}`;
+  }
   return fetch(`${state.backendUrl}${path}`, {
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
+    headers,
   }).then(async (response) => {
     const text = await response.text();
     const payload = text ? JSON.parse(text) : {};
     if (!response.ok) {
       throw payload;
     }
+    return payload;
+  });
+}
+
+function authApi(path, body) {
+  return fetch(`${state.backendUrl}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).then(async (response) => {
+    const text = await response.text();
+    const payload = text ? JSON.parse(text) : {};
+    if (!response.ok) throw payload;
     return payload;
   });
 }
@@ -156,6 +183,7 @@ function renderEvents() {
 }
 
 function render() {
+  renderAuth();
   if (!state.round) {
     els.turnNumber.textContent = "-";
     els.activeActor.textContent = "-";
@@ -182,6 +210,21 @@ function render() {
   renderEvents();
 }
 
+function renderAuth() {
+  els.authPanel.hidden = !state.authEnabled;
+  if (!state.authEnabled) return;
+
+  const loggedIn = Boolean(state.token);
+  els.authStatus.textContent = loggedIn ? `Logged in as ${state.username}` : "Login or register to play.";
+  els.authUsername.disabled = loggedIn;
+  els.authPassword.disabled = loggedIn;
+  els.loginButton.hidden = loggedIn;
+  els.registerButton.hidden = loggedIn;
+  els.logoutButton.hidden = !loggedIn;
+  els.startButton.disabled = !loggedIn;
+  els.connectButton.disabled = false;
+}
+
 async function refreshRound() {
   const payload = await api("/api/round");
   state.round = payload.round;
@@ -200,7 +243,10 @@ function connectSse() {
     state.source.close();
   }
   els.connectionStatus.textContent = "SSE connecting...";
-  state.source = new EventSource(`${state.backendUrl}/api/live`);
+  const liveUrl = state.token
+    ? `${state.backendUrl}/api/live?token=${encodeURIComponent(state.token)}`
+    : `${state.backendUrl}/api/live`;
+  state.source = new EventSource(liveUrl);
   state.source.onopen = () => {
     els.connectionStatus.textContent = "SSE connected";
   };
@@ -235,9 +281,48 @@ function connectSse() {
 
 async function connect() {
   state.backendUrl = els.backendUrl.value.replace(/\/$/, "");
+  const authConfig = await fetch(`${state.backendUrl}/api/auth/config`).then((response) => response.json());
+  state.authEnabled = authConfig.enabled;
+  renderAuth();
+  if (state.authEnabled && !state.token) {
+    setMessage("Login or register to continue", "");
+    return;
+  }
   connectSse();
   await Promise.all([refreshRound(), refreshEvents()]);
   setMessage("Connected", "ok");
+}
+
+async function submitAuth(path) {
+  try {
+    const username = els.authUsername.value.trim();
+    const password = els.authPassword.value;
+    const response = await authApi(path, { username, password });
+    state.token = response.token;
+    state.username = response.username;
+    localStorage.setItem("duckSelfPlayToken", state.token);
+    localStorage.setItem("duckSelfPlayUsername", state.username);
+    els.authPassword.value = "";
+    await connect();
+  } catch (error) {
+    setMessage(error.error?.message || String(error), "bad");
+  }
+}
+
+function logout() {
+  state.token = "";
+  state.username = "";
+  state.round = null;
+  state.events = [];
+  state.queue = [];
+  localStorage.removeItem("duckSelfPlayToken");
+  localStorage.removeItem("duckSelfPlayUsername");
+  if (state.source) {
+    state.source.close();
+    state.source = null;
+  }
+  render();
+  setMessage("Logged out", "");
 }
 
 async function startRound() {
@@ -319,6 +404,9 @@ els.submitButton.addEventListener("click", submitTurn);
 els.connectButton.addEventListener("click", () => connect().catch((error) => setMessage(error.error?.message || String(error), "bad")));
 els.startButton.addEventListener("click", () => startRound().catch((error) => setMessage(error.error?.message || String(error), "bad")));
 els.refreshButton.addEventListener("click", () => Promise.all([refreshRound(), refreshEvents()]));
+els.loginButton.addEventListener("click", () => submitAuth("/api/auth/login"));
+els.registerButton.addEventListener("click", () => submitAuth("/api/auth/register"));
+els.logoutButton.addEventListener("click", logout);
 
 connect().catch((error) => {
   els.connectionStatus.textContent = "Backend unavailable";

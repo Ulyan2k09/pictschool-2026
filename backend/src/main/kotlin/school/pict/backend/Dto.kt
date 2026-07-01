@@ -33,3 +33,15 @@ data class ApiError(
     val message: String,
     val details: JsonObject = JsonObject(emptyMap())
 )
+
+@Serializable
+data class AuthConfigResponse(val enabled: Boolean)
+
+@Serializable
+data class AuthRequest(val username: String, val password: String)
+
+@Serializable
+data class AuthResponse(val token: String, val username: String)
+
+@Serializable
+data class CurrentUserResponse(val username: String?)

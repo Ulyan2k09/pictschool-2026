@@ -1,6 +1,7 @@
 package school.pict.backend
 
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.serialization.kotlinx.json.json
@@ -40,14 +41,43 @@ fun Application.backendModule(
 
     install(CORS) {
         anyHost()
+        allowHeader(HttpHeaders.Authorization)
         allowHeader(HttpHeaders.ContentType)
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
     }
 
     val engine = RoundEngine(store, tcpSender, config)
+    val authService = if (config.authEnabled) AuthService(config) else null
 
     routing {
+        get("/api/auth/config") {
+            call.respond(AuthConfigResponse(config.authEnabled))
+        }
+
+        post("/api/auth/register") {
+            val service = authService ?: return@post call.respondError(ApiError("auth_disabled", "Авторизация выключена."))
+            val request = call.receive<AuthRequest>()
+            val token = service.register(request.username, request.password).getOrElse { error ->
+                return@post call.respondError(ApiError("auth_error", error.message ?: "Не удалось зарегистрироваться."))
+            }
+            call.respond(status = HttpStatusCode.Created, AuthResponse(token, request.username.trim().lowercase()))
+        }
+
+        post("/api/auth/login") {
+            val service = authService ?: return@post call.respondError(ApiError("auth_disabled", "Авторизация выключена."))
+            val request = call.receive<AuthRequest>()
+            val token = service.login(request.username, request.password).getOrElse { error ->
+                return@post call.respondError(ApiError("auth_error", error.message ?: "Не удалось войти."))
+            }
+            call.respond(AuthResponse(token, request.username.trim().lowercase()))
+        }
+
+        get("/api/auth/me") {
+            val username = call.authenticatedUsername(authService)
+            call.respond(CurrentUserResponse(username))
+        }
+
         get("/api/docs") {
             call.respondText(swaggerHtml(), ContentType.Text.Html)
         }
@@ -60,10 +90,12 @@ fun Application.backendModule(
         }
 
         get("/api/round") {
+            if (!call.requireAuth(authService)) return@get
             call.respond(RoundResponse(store.snapshot()))
         }
 
         post("/api/round/start") {
+            if (!call.requireAuth(authService)) return@post
             val request = runCatching { call.receive<StartRoundRequest>() }.getOrDefault(StartRoundRequest())
             val round = engine.startRound(request.scenarioId)
             call.respond(
@@ -73,6 +105,7 @@ fun Application.backendModule(
         }
 
         post("/api/turn/submit") {
+            if (!call.requireAuth(authService)) return@post
             val request = call.receive<TurnCommandRequest>()
             when (val result = engine.submitTurn(request)) {
                 is SubmitTurnResult.Accepted -> call.respond(
@@ -84,10 +117,12 @@ fun Application.backendModule(
         }
 
         get("/api/events") {
+            if (!call.requireAuth(authService)) return@get
             call.respond(EventsResponse(store.events()))
         }
 
         get("/api/live") {
+            if (!call.requireAuth(authService)) return@get
             call.respondTextWriter(contentType = ContentType.Text.EventStream) {
                 var sentEvents = 0
                 while (true) {
@@ -104,6 +139,7 @@ fun Application.backendModule(
         }
 
         post("/api/round/reset") {
+            if (!call.requireAuth(authService)) return@post
             val round = engine.resetRound()
             call.respond(ResetRoundResponse(round.id, round.status.wireName(), true))
         }
@@ -135,9 +171,29 @@ private fun swaggerHtml(): String = """
 
 private suspend fun ApplicationCall.respondError(error: ApiError) {
     val status = when (error.code) {
-        "unknown_command", "turn_limit_exceeded", "wrong_actor_turn", "round_not_running" -> io.ktor.http.HttpStatusCode.BadRequest
-        "simulation_error" -> io.ktor.http.HttpStatusCode.BadGateway
-        else -> io.ktor.http.HttpStatusCode.InternalServerError
+        "unknown_command", "turn_limit_exceeded", "wrong_actor_turn", "round_not_running", "auth_error", "auth_disabled" -> HttpStatusCode.BadRequest
+        "unauthorized" -> HttpStatusCode.Unauthorized
+        "simulation_error" -> HttpStatusCode.BadGateway
+        else -> HttpStatusCode.InternalServerError
     }
     respond(status, ErrorResponse(error))
+}
+
+private suspend fun ApplicationCall.requireAuth(authService: AuthService?): Boolean {
+    if (authService == null) return true
+    if (authenticatedUsername(authService) != null) return true
+    respondError(ApiError("unauthorized", "Нужна авторизация."))
+    return false
+}
+
+private fun ApplicationCall.authenticatedUsername(authService: AuthService?): String? {
+    if (authService == null) return null
+    return authService.usernameByToken(authToken())
+}
+
+private fun ApplicationCall.authToken(): String? {
+    val bearer = request.headers[HttpHeaders.Authorization]
+        ?.removePrefix("Bearer ")
+        ?.takeIf { it.isNotBlank() }
+    return bearer ?: request.queryParameters["token"]
 }

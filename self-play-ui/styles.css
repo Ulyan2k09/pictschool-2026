@@ -64,7 +64,8 @@ button:disabled {
 .topbar,
 .score-strip,
 .control-panel,
-.events-section {
+.events-section,
+.auth-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
@@ -88,6 +89,45 @@ button:disabled {
 .topbar p {
   margin: 6px 0 0;
   color: var(--muted);
+}
+
+.auth-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 16px;
+}
+
+.auth-panel[hidden] {
+  display: none;
+}
+
+.auth-panel h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.auth-panel p {
+  margin: 5px 0 0;
+  color: var(--muted);
+}
+
+.auth-form {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.auth-form input {
+  width: 150px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 10px;
 }
 
 .topbar-actions {
@@ -437,6 +477,20 @@ button:disabled {
   .topbar {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .auth-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .auth-form {
+    justify-content: stretch;
+  }
+
+  .auth-form input,
+  .auth-form button {
+    flex: 1 1 140px;
   }
 
   .score-strip {
