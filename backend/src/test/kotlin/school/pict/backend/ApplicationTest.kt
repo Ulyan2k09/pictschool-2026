@@ -20,7 +20,15 @@ class ApplicationTest {
     fun `round can be started and turn can be submitted through http api`() = testApplication {
         application {
             backendModule(tcpSender = object : TcpCommandSender {
-                override fun send(payload: String): Result<Unit> = Result.success(Unit)
+                override fun send(request: SimulationCommandRequest): Result<SimulationCommandResult> = Result.success(
+                    SimulationCommandResult(
+                        ok = true,
+                        actor = request.actor,
+                        finalPosition = Position(2, 1),
+                        finalDirection = Direction.S,
+                        ducksCollected = emptyList()
+                    )
+                )
             })
         }
 
@@ -48,7 +56,15 @@ class ApplicationTest {
     fun `swagger docs and openapi spec are exposed`() = testApplication {
         application {
             backendModule(tcpSender = object : TcpCommandSender {
-                override fun send(payload: String): Result<Unit> = Result.success(Unit)
+                override fun send(request: SimulationCommandRequest): Result<SimulationCommandResult> = Result.success(
+                    SimulationCommandResult(
+                        ok = true,
+                        actor = request.actor,
+                        finalPosition = Position(0, 0),
+                        finalDirection = Direction.E,
+                        ducksCollected = emptyList()
+                    )
+                )
             })
         }
 

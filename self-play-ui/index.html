@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Duck Self Play</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="topbar" aria-label="Game status">
+      <div>
+        <h1>Duck Self Play</h1>
+        <p id="connectionStatus">Connecting...</p>
+      </div>
+      <div class="topbar-actions">
+        <label class="endpoint-field">
+          <span>Backend</span>
+          <input id="backendUrl" type="url" value="http://localhost:8080">
+        </label>
+        <button id="connectButton" class="secondary-button" type="button">Connect</button>
+        <button id="startButton" class="primary-button" type="button">New round</button>
+      </div>
+    </section>
+
+    <section class="score-strip" aria-label="Round summary">
+      <div>
+        <span>Turn</span>
+        <strong id="turnNumber">-</strong>
+      </div>
+      <div>
+        <span>Active</span>
+        <strong id="activeActor">-</strong>
+      </div>
+      <div>
+        <span>Robot</span>
+        <strong id="robotScore">0</strong>
+      </div>
+      <div>
+        <span>Agent</span>
+        <strong id="agentScore">0</strong>
+      </div>
+      <div>
+        <span>Ducks</span>
+        <strong id="ducksLeft">-</strong>
+      </div>
+    </section>
+
+    <section class="play-layout">
+      <div class="board-wrap">
+        <div class="board-frame" aria-label="Game board with compass labels">
+          <div class="compass-label north">N</div>
+          <div class="compass-label west">W</div>
+          <div id="board" class="board" aria-label="Game board"></div>
+          <div class="compass-label east">E</div>
+          <div class="compass-label south">S</div>
+        </div>
+      </div>
+
+      <aside class="control-panel" aria-label="Turn controls">
+        <div class="actor-panel">
+          <div class="actor robot">
+            <span class="actor-mark">R</span>
+            <div>
+              <strong>Robot</strong>
+              <span id="robotState">-</span>
+            </div>
+          </div>
+          <div class="actor agent">
+            <span class="actor-mark">A</span>
+            <div>
+              <strong>Agent</strong>
+              <span id="agentState">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="command-pad">
+          <button type="button" data-command="1">Forward</button>
+          <button type="button" data-command="2">Back</button>
+          <button type="button" data-command="3">Left</button>
+          <button type="button" data-command="4">Right</button>
+        </div>
+
+        <div class="command-queue">
+          <span id="commandCount">0 / 5</span>
+          <div id="commandList" class="command-list"></div>
+        </div>
+
+        <div class="turn-actions">
+          <button id="undoButton" class="secondary-button" type="button">Undo</button>
+          <button id="clearButton" class="secondary-button" type="button">Clear</button>
+          <button id="submitButton" class="primary-button" type="button">Submit turn</button>
+        </div>
+
+        <div id="messageBox" class="message-box" role="status"></div>
+      </aside>
+    </section>
+
+    <section class="events-section" aria-label="Event log">
+      <div class="section-title">
+        <h2>Events</h2>
+        <button id="refreshButton" class="secondary-button" type="button">Refresh</button>
+      </div>
+      <ol id="eventLog" class="event-log"></ol>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

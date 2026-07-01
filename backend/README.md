@@ -34,6 +34,12 @@ SIM_TCP_TELEMETRY_PORT=5056
 Минимальная проверка:
 
 ```bash
+nc -lk 5055
+```
+
+В отдельном терминале:
+
+```bash
 curl -X POST http://localhost:8080/api/round/start \
   -H 'Content-Type: application/json' \
   -d '{"scenarioId":"default"}'
@@ -47,7 +53,7 @@ curl http://localhost:8080/api/events
 curl -N http://localhost:8080/api/live
 ```
 
-Если на `SIM_TCP_COMMAND_PORT` не запущена симуляция, корректная команда вернет `simulation_error`, а в журнале появится `turn.failed`.
+Если на `SIM_TCP_COMMAND_PORT` не запущена симуляция или временная TCP-заглушка `nc`, корректная команда вернет `simulation_error`, а в журнале появится `turn.failed`.
 
 ## Что должно быть в MVP
 

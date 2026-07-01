@@ -41,14 +41,15 @@ class RoundEngine(
 
         validate(round, actor, request.commands)?.let { return SubmitTurnResult.Rejected(it) }
 
-        val payload = request.commands.joinToString(" ")
+        val forwardedAs = request.commands.joinToString(" ")
+        val simulationRequest = SimulationCommandRequest(actor.wireName(), request.commands, round)
         val submitted = store.append(
             "turn.submitted",
             round.turnNumber,
             actor,
             buildJsonObject {
                 put("actor", actor.wireName())
-                put("commands", request.commands.joinToString(" "))
+                put("commands", forwardedAs)
             }
         )
         store.append(
@@ -57,14 +58,14 @@ class RoundEngine(
             actor,
             buildJsonObject {
                 put("actor", actor.wireName())
-                put("tcpPayload", payload)
+                put("tcpPayload", forwardedAs)
                 put("host", config.simTcpHost)
                 put("port", config.simTcpCommandPort)
                 put("telemetryPort", config.simTcpTelemetryPort)
             }
         )
 
-        val tcpResult = tcpSender.send(payload)
+        val tcpResult = tcpSender.send(simulationRequest)
         if (tcpResult.isFailure) {
             val message = tcpResult.exceptionOrNull()?.message ?: "Симуляция недоступна."
             store.append("turn.failed", round.turnNumber, actor, buildJsonObject { put("error", message) })
@@ -77,7 +78,20 @@ class RoundEngine(
             )
         }
 
-        val afterMove = LocalMovement.apply(round, actor, request.commands)
+        val simulationResult = tcpResult.getOrThrow()
+        val simulationError = validateSimulationResult(simulationResult, actor)
+        if (simulationError != null) {
+            store.append("turn.failed", round.turnNumber, actor, buildJsonObject { put("error", simulationError) })
+            return SubmitTurnResult.Rejected(
+                ApiError(
+                    "simulation_error",
+                    "Симуляция вернула ошибку выполнения.",
+                    buildJsonObject { put("cause", simulationError) }
+                )
+            )
+        }
+
+        val afterMove = LocalMovement.applySimulationResult(round, actor, simulationResult)
         store.replace(afterMove.round)
         store.append(
             "actor.moved",
@@ -116,7 +130,23 @@ class RoundEngine(
             )
         }
 
-        return SubmitTurnResult.Accepted(submitted.id, payload)
+        return SubmitTurnResult.Accepted(submitted.id, forwardedAs)
+    }
+
+    private fun validateSimulationResult(result: SimulationCommandResult, actor: ActorId): String? {
+        if (!result.ok) {
+            return result.error ?: "Симуляция вернула ok=false."
+        }
+        if (ActorId.fromWire(result.actor) != actor) {
+            return "Симуляция вернула результат для другого участника: ${result.actor}."
+        }
+        if (result.finalPosition == null) {
+            return "Симуляция не вернула finalPosition."
+        }
+        if (result.finalDirection == null) {
+            return "Симуляция не вернула finalDirection."
+        }
+        return null
     }
 
     private fun validate(round: Round, actor: ActorId, commands: List<Int>): ApiError? {
