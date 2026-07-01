@@ -1,0 +1,28 @@
+name: duck_round
+description: "Мобильное управление игрой «Человек против ИИ-агента» (сбор уточек)."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # HTTP-клиент для REST API бэкенда и чтения SSE-потока /api/live.
+  http: ^1.2.2
+
+  # Простое и понятное управление состоянием (ChangeNotifier + Provider).
+  provider: ^6.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
