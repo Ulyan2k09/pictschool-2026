@@ -29,3 +29,6 @@ services:
       - "5173:80"
     depends_on:
       - backend
+
+volumes:
+  user_db
