@@ -17,6 +17,8 @@ COMMAND_ALIASES = {
     "right": 4,
 }
 
+AGENT_AUTO_COMMAND = [1]
+
 
 def api(base_url: str, method: str, path: str, body: dict[str, Any] | None = None) -> dict[str, Any]:
     data = None if body is None else json.dumps(body).encode("utf-8")
@@ -90,6 +92,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Play robot vs agent through the backend API.")
     parser.add_argument("--base-url", default="http://localhost:8080")
     parser.add_argument("--no-start", action="store_true", help="do not start a new round on launch")
+    parser.add_argument("--agent-manual", action="store_true", help="ask for agent commands instead of auto-submitting them")
     args = parser.parse_args()
 
     if not args.no_start:
@@ -111,6 +114,14 @@ def main() -> None:
             return
 
         actor = round_state["activeActor"]
+        if actor == "agent" and not args.agent_manual:
+            print("agent> auto")
+            result = api(args.base_url, "POST", "/api/turn/submit", {"actor": actor, "commands": AGENT_AUTO_COMMAND})
+            if "error" in result:
+                print(result["error"])
+                return
+            continue
+
         raw = input(f"{actor}> ").strip()
         if raw.lower() in {"q", "quit", "exit"}:
             return

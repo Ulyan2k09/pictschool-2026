@@ -35,6 +35,73 @@ def move(position: dict[str, int], direction: str, step: int, field: dict[str, A
     return candidate if inside and not blocked else position
 
 
+def apply_commands(
+    position: dict[str, int],
+    direction: str,
+    commands: list[int],
+    field: dict[str, Any],
+) -> tuple[dict[str, int], str]:
+    next_position = dict(position)
+    next_direction = direction
+    for command in commands:
+        if command == 1:
+            next_position = move(next_position, next_direction, 1, field)
+        elif command == 2:
+            next_position = move(next_position, next_direction, -1, field)
+        elif command == 3:
+            next_direction = turn_left(next_direction)
+        elif command == 4:
+            next_direction = turn_right(next_direction)
+    return next_position, next_direction
+
+
+def remaining_ducks(field: dict[str, Any]) -> list[dict[str, Any]]:
+    return [duck for duck in field["ducks"] if duck.get("collectedBy") is None]
+
+
+def manhattan(left: dict[str, int], right: dict[str, int]) -> int:
+    return abs(left["x"] - right["x"]) + abs(left["y"] - right["y"])
+
+
+def distance_to_closest_duck(position: dict[str, int], ducks: list[dict[str, Any]]) -> int:
+    if not ducks:
+        return 0
+    return min(manhattan(position, duck["position"]) for duck in ducks)
+
+
+def choose_agent_commands(actor_state: dict[str, Any], field: dict[str, Any], limit: int) -> list[int]:
+    ducks = remaining_ducks(field)
+    if not ducks:
+        return [3]
+
+    best_commands: list[int] = [3]
+    best_score: tuple[int, int, int, int] | None = None
+    frontier: list[list[int]] = [[]]
+
+    for _ in range(limit):
+        next_frontier: list[list[int]] = []
+        for prefix in frontier:
+            for command in sorted(ALLOWED_COMMANDS):
+                commands = prefix + [command]
+                position, direction = apply_commands(
+                    actor_state["position"],
+                    actor_state["direction"],
+                    commands,
+                    field,
+                )
+                collected = sum(1 for duck in ducks if duck["position"] == position)
+                distance = distance_to_closest_duck(position, ducks)
+                turns = sum(1 for item in commands if item in {3, 4})
+                score = (-collected, distance, len(commands), turns)
+                if best_score is None or score < best_score:
+                    best_score = score
+                    best_commands = commands
+                next_frontier.append(commands)
+        frontier = next_frontier
+
+    return best_commands
+
+
 def simulate(request: dict[str, Any], agent_mode: str) -> dict[str, Any]:
     actor = request["actor"]
     round_state = request["round"]
@@ -42,7 +109,13 @@ def simulate(request: dict[str, Any], agent_mode: str) -> dict[str, Any]:
     field = round_state["field"]
 
     requested_commands = request["commands"]
-    commands = AGENT_HARDCODED_COMMANDS if actor == "agent" and agent_mode == "hardcoded" else requested_commands
+    if actor == "agent" and agent_mode == "hardcoded":
+        commands = AGENT_HARDCODED_COMMANDS
+    elif actor == "agent" and agent_mode == "auto":
+        commands = choose_agent_commands(actor_state, field, round_state["moveLimitPerTurn"])
+    else:
+        commands = requested_commands
+
     invalid = [command for command in commands if command not in ALLOWED_COMMANDS]
     if invalid:
         return {
@@ -52,18 +125,7 @@ def simulate(request: dict[str, Any], agent_mode: str) -> dict[str, Any]:
             "error": f"Invalid commands: {invalid}",
         }
 
-    position = dict(actor_state["position"])
-    direction = actor_state["direction"]
-
-    for command in commands:
-        if command == 1:
-            position = move(position, direction, 1, field)
-        elif command == 2:
-            position = move(position, direction, -1, field)
-        elif command == 3:
-            direction = turn_left(direction)
-        elif command == 4:
-            direction = turn_right(direction)
+    position, direction = apply_commands(actor_state["position"], actor_state["direction"], commands, field)
 
     ducks_collected = [
         duck["id"]
@@ -79,7 +141,7 @@ def simulate(request: dict[str, Any], agent_mode: str) -> dict[str, Any]:
         "ducksCollected": ducks_collected,
         "error": None,
         "executedCommands": commands,
-        "mode": "hardcoded-agent" if actor == "agent" and agent_mode == "hardcoded" else "command-replay",
+        "mode": f"{agent_mode}-agent" if actor == "agent" else "command-replay",
     }
 
 
@@ -126,9 +188,9 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=5055)
     parser.add_argument(
         "--agent-mode",
-        choices=["hardcoded", "manual"],
-        default="hardcoded",
-        help="hardcoded ignores submitted agent commands; manual executes them",
+        choices=["auto", "hardcoded", "manual"],
+        default="auto",
+        help="auto chooses agent commands algorithmically; hardcoded uses a fixed script; manual executes submitted commands",
     )
     args = parser.parse_args()
 

@@ -1,0 +1,31 @@
+services:
+  simulation:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/simulation.Dockerfile
+    environment:
+      PYTHONUNBUFFERED: "1"
+
+  backend:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/backend.Dockerfile
+    environment:
+      HTTP_HOST: "0.0.0.0"
+      HTTP_PORT: "8080"
+      SIM_TCP_HOST: "simulation"
+      SIM_TCP_COMMAND_PORT: "5055"
+      SIM_TCP_TELEMETRY_PORT: "5056"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - simulation
+
+  ui:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/ui.Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend

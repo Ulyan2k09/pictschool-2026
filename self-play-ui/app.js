@@ -1,9 +1,10 @@
 const state = {
-  backendUrl: "http://localhost:8080",
+  backendUrl: `${window.location.protocol}//${window.location.hostname}:8080`,
   round: null,
   events: [],
   queue: [],
   source: null,
+  agentAutoBusy: false,
 };
 
 const els = {
@@ -28,6 +29,8 @@ const els = {
   messageBox: document.getElementById("messageBox"),
   eventLog: document.getElementById("eventLog"),
 };
+
+els.backendUrl.value = state.backendUrl;
 
 const commandLabels = {
   1: "F",
@@ -128,7 +131,11 @@ function renderQueue() {
     chip.textContent = commandLabels[command];
     els.commandList.append(chip);
   });
-  els.submitButton.disabled = state.queue.length === 0 || !state.round || state.round.status !== "running";
+  const robotTurn = state.round?.status === "running" && state.round.activeActor === "robot";
+  document.querySelectorAll("[data-command]").forEach((button) => {
+    button.disabled = !robotTurn;
+  });
+  els.submitButton.disabled = state.queue.length === 0 || !robotTurn;
   els.undoButton.disabled = state.queue.length === 0;
   els.clearButton.disabled = state.queue.length === 0;
 }
@@ -179,6 +186,7 @@ async function refreshRound() {
   const payload = await api("/api/round");
   state.round = payload.round;
   render();
+  maybeSubmitAgentTurn();
 }
 
 async function refreshEvents() {
@@ -244,6 +252,10 @@ async function startRound() {
 
 async function submitTurn() {
   if (!state.round || state.queue.length === 0) return;
+  if (state.round.activeActor !== "robot") {
+    setMessage("Agent turn is automatic", "bad");
+    return;
+  }
   const actor = state.round.activeActor;
   try {
     const response = await api("/api/turn/submit", {
@@ -257,6 +269,28 @@ async function submitTurn() {
     setMessage(error.error?.message || String(error), "bad");
   }
   render();
+}
+
+async function maybeSubmitAgentTurn() {
+  if (!state.round || state.round.status !== "running" || state.round.activeActor !== "agent") return;
+  if (state.agentAutoBusy) return;
+
+  state.agentAutoBusy = true;
+  setMessage("Agent is thinking...", "");
+  try {
+    await api("/api/turn/submit", {
+      method: "POST",
+      body: JSON.stringify({ actor: "agent", commands: [1] }),
+    });
+    state.queue = [];
+    await Promise.all([refreshRound(), refreshEvents()]);
+    setMessage("Agent moved", "ok");
+  } catch (error) {
+    setMessage(error.error?.message || String(error), "bad");
+  } finally {
+    state.agentAutoBusy = false;
+    render();
+  }
 }
 
 document.querySelectorAll("[data-command]").forEach((button) => {

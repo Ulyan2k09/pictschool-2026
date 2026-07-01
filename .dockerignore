@@ -1,0 +1,9 @@
+.git
+.gradle
+backend/.gradle
+backend/build
+backend/out
+**/__pycache__
+**/*.pyc
+**/.DS_Store
+docs/IR_PRESENTATION_BRIGHT.pptx
