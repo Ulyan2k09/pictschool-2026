@@ -71,6 +71,7 @@ tool/
 
 ## Документация
 
+- [RUN.md](RUN.md) — полная инструкция: что поставить, как запустить и собрать под устройство.
 - [ARCHITECTURE.md](ARCHITECTURE.md) — слои, поток данных, принципы.
 - [STUDENT_TASKS.md](STUDENT_TASKS.md) — задачи для участников (что дорабатывать).
 - [TRACK_BRIEF.md](TRACK_BRIEF.md) — исходное описание трека Mobile.
