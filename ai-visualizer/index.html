@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Visualizer</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <h1>AI Visualizer (separate)</h1>
+      <div class="controls">
+        <input id="backendUrl" type="url" value="http://127.0.0.1:8080" />
+        <button id="connectButton" type="button">Connect</button>
+        <button id="startRoundButton" type="button">New round</button>
+      </div>
+      <p id="status">Disconnected</p>
+    </header>
+
+    <section class="summary">
+      <div>Turn: <strong id="turnNumber">-</strong></div>
+      <div>Active: <strong id="activeActor">-</strong></div>
+      <div>Robot: <strong id="robotScore">0</strong></div>
+      <div>Agent: <strong id="agentScore">0</strong></div>
+      <div>Ducks: <strong id="ducksLeft">-</strong></div>
+    </section>
+
+    <section class="layout">
+      <div class="board-wrap">
+        <div id="board" class="board"></div>
+      </div>
+
+      <aside class="panel">
+        <h2>Robot Control</h2>
+        <p>Нужен только чтобы сдвигать ход к агенту. Агент ходит отдельным сервисом.</p>
+        <div class="cmd-pad">
+          <button type="button" data-command="1">Forward (F)</button>
+          <button type="button" data-command="2">Back (B)</button>
+          <button type="button" data-command="3">Left (L)</button>
+          <button type="button" data-command="4">Right (R)</button>
+        </div>
+        <div id="queue" class="queue"></div>
+        <div class="queue-actions">
+          <button id="undoButton" type="button">Undo</button>
+          <button id="clearButton" type="button">Clear</button>
+          <button id="submitButton" type="button">Submit robot turn</button>
+        </div>
+      </aside>
+    </section>
+
+    <section class="events">
+      <h2>Events</h2>
+      <ol id="eventLog"></ol>
+      <h3>Moves (robot + agent)</h3>
+      <ol id="moveLog"></ol>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
+

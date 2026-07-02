@@ -1,3 +1,14 @@
 docs/WITH_TEAM_CONTACTS.md
 docs/.DS_Store
 .DS_Store
+
+# Python agent local artifacts
+ai/.venv/
+ai/.pytest_cache/
+ai/**/__pycache__/
+ai/**/*.py[cod]
+ai/.env
+
+# Python bytecode (project-wide)
+**/__pycache__/
+**/*.pyc

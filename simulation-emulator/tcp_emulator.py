@@ -40,19 +40,26 @@ def apply_commands(
     direction: str,
     commands: list[int],
     field: dict[str, Any],
-) -> tuple[dict[str, int], str]:
+) -> tuple[dict[str, int], str, list[dict[str, int]]]:
     next_position = dict(position)
     next_direction = direction
+    visited_positions: list[dict[str, int]] = []
     for command in commands:
         if command == 1:
-            next_position = move(next_position, next_direction, 1, field)
+            moved_position = move(next_position, next_direction, 1, field)
+            if moved_position != next_position:
+                next_position = moved_position
+                visited_positions.append(dict(next_position))
         elif command == 2:
-            next_position = move(next_position, next_direction, -1, field)
+            moved_position = move(next_position, next_direction, -1, field)
+            if moved_position != next_position:
+                next_position = moved_position
+                visited_positions.append(dict(next_position))
         elif command == 3:
             next_direction = turn_left(next_direction)
         elif command == 4:
             next_direction = turn_right(next_direction)
-    return next_position, next_direction
+    return next_position, next_direction, visited_positions
 
 
 def remaining_ducks(field: dict[str, Any]) -> list[dict[str, Any]]:
@@ -125,12 +132,14 @@ def simulate(request: dict[str, Any], agent_mode: str) -> dict[str, Any]:
             "error": f"Invalid commands: {invalid}",
         }
 
-    position, direction = apply_commands(actor_state["position"], actor_state["direction"], commands, field)
+    position, direction, visited_positions = apply_commands(
+        actor_state["position"], actor_state["direction"], commands, field
+    )
 
     ducks_collected = [
         duck["id"]
         for duck in field["ducks"]
-        if duck.get("collectedBy") is None and duck["position"] == position
+        if duck.get("collectedBy") is None and any(step == duck["position"] for step in visited_positions)
     ]
 
     return {
