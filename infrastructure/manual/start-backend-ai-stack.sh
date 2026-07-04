@@ -13,8 +13,43 @@ if [[ -f "$AI_DIR/.env" ]]; then
   set +a
 fi
 
-export JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home}"
-export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+declare -a PYTHON_CMD=()
+if command -v python3 >/dev/null 2>&1 && python3 -c "import sys" >/dev/null 2>&1; then
+  PYTHON_CMD=(python3)
+elif command -v python >/dev/null 2>&1 && python -c "import sys" >/dev/null 2>&1; then
+  PYTHON_CMD=(python)
+elif command -v py >/dev/null 2>&1 && py -3 -c "import sys" >/dev/null 2>&1; then
+  PYTHON_CMD=(py -3)
+else
+  echo "[stack] python 3 not found (python3/python/py -3)." >&2
+  exit 1
+fi
+
+if [[ -n "${JAVA_HOME:-}" ]] && [[ ! -d "$JAVA_HOME" ]]; then
+  echo "[stack] ignoring invalid JAVA_HOME: $JAVA_HOME"
+  unset JAVA_HOME
+fi
+
+if [[ -z "${JAVA_HOME:-}" ]]; then
+  case "$(uname -s)" in
+    Darwin)
+      for candidate in \
+        /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home \
+        /usr/local/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+      do
+        if [[ -d "$candidate" ]]; then
+          export JAVA_HOME="$candidate"
+          break
+        fi
+      done
+      ;;
+  esac
+fi
+
+if [[ -n "${JAVA_HOME:-}" ]] && [[ -d "$JAVA_HOME/bin" ]]; then
+  export PATH="$JAVA_HOME/bin:$PATH"
+fi
+
 export HTTP_HOST="${HTTP_HOST:-127.0.0.1}"
 export HTTP_PORT="${HTTP_PORT:-8080}"
 export AGENT_BACKEND_URL="${AGENT_BACKEND_URL:-http://127.0.0.1:8080}"
@@ -31,7 +66,7 @@ cleanup() {
 trap cleanup INT TERM EXIT
 
 echo "[stack] starting simulation emulator on 127.0.0.1:5055"
-python3 "$SIM_DIR/tcp_emulator.py" --host 127.0.0.1 --port 5055 --agent-mode manual &
+"${PYTHON_CMD[@]}" "$SIM_DIR/tcp_emulator.py" --host 127.0.0.1 --port 5055 --agent-mode manual &
 SIM_PID=$!
 
 echo "[stack] starting backend on http://${HTTP_HOST}:${HTTP_PORT}"
@@ -58,7 +93,7 @@ echo "[stack] starting AI agent"
 (
   cd "$AI_DIR"
   if [[ ! -d ".venv" ]]; then
-    python3 -m venv .venv
+    "${PYTHON_CMD[@]}" -m venv .venv
   fi
   # shellcheck disable=SC1091
   source .venv/bin/activate
