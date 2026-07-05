@@ -6,9 +6,19 @@ from datetime import datetime, timezone
 from typing import Any
 
 
-ALLOWED_COMMANDS = {1, 2, 3, 4}
+ALLOWED_COMMANDS = {1, 2, 3, 4, 10, 11, 12, 13}
 AGENT_HARDCODED_COMMANDS = [1, 1, 4, 1]
 DIRECTIONS = ["N", "E", "S", "W"]
+COMMAND_EXPANSIONS = {
+    1: [1],
+    2: [2],
+    3: [3],
+    4: [4],
+    10: [1, 1],
+    11: [3, 3],
+    12: [4, 1, 3],
+    13: [3, 1, 4],
+}
 
 
 def turn_left(direction: str) -> str:
@@ -44,7 +54,8 @@ def apply_commands(
     next_position = dict(position)
     next_direction = direction
     visited_positions: list[dict[str, int]] = []
-    for command in commands:
+    primitive_commands = [primitive for command in commands for primitive in COMMAND_EXPANSIONS.get(command, [])]
+    for command in primitive_commands:
         if command == 1:
             moved_position = move(next_position, next_direction, 1, field)
             if moved_position != next_position:

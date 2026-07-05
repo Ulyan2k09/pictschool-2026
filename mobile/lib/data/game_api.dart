@@ -63,7 +63,7 @@ class GameApi {
   }
 
   /// POST /api/turn/submit → отправить ход активного участника.
-  /// [commands] — коды 1..4, не более 5 штук (проверяет backend).
+  /// [commands] — коды команд, не более 5 штук (проверяет backend).
   Future<TurnAccepted> submitTurn({
     required String actor,
     required List<int> commands,

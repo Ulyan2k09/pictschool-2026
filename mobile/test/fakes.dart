@@ -21,8 +21,8 @@ Round sampleRound({String status = 'running', String activeActor = 'robot'}) {
     ducksLeft: ducks.where((d) => !d.isCollected).length,
     score: const Score(0, 0),
     field: GameField(
-      width: 8,
-      height: 6,
+      width: 10,
+      height: 10,
       obstacles: const [Obstacle('wall-1', Position(3, 2))],
       ducks: ducks,
     ),
@@ -36,7 +36,7 @@ Round sampleRound({String status = 'running', String activeActor = 'robot'}) {
       ),
       'agent': ActorState(
         id: 'agent',
-        position: Position(7, 5),
+        position: Position(9, 9),
         direction: 'W',
         collectedDucks: 0,
         lastError: null,

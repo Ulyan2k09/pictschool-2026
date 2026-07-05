@@ -51,6 +51,19 @@ class RoundEngineTest {
     }
 
     @Test
+    fun `complex movement command is accepted and forwarded to simulation`() {
+        val sender = RecordingTcpSender()
+        val store = GameStore()
+        val engine = RoundEngine(store, sender, AppConfig())
+
+        engine.startRound("default")
+        val result = engine.submitTurn(TurnCommandRequest("robot", listOf(10, 11, 12)))
+
+        assertIs<SubmitTurnResult.Accepted>(result)
+        assertEquals(listOf(10, 11, 12), sender.requests.single().commands)
+    }
+
+    @Test
     fun `tcp failure is converted to simulation error`() {
         val sender = RecordingTcpSender(Result.failure(IllegalStateException("port closed")))
         val store = GameStore()
@@ -87,7 +100,7 @@ class RoundEngineTest {
 
         assertIs<SubmitTurnResult.Accepted>(result)
         assertEquals(1, store.snapshot().score.robot)
-        assertEquals(7, store.snapshot().ducksLeft)
+        assertEquals(9, store.snapshot().ducksLeft)
         assertEquals("duck.collected", store.events().first { it.type == "duck.collected" }.type)
     }
 }

@@ -1,0 +1,16 @@
+# Packaged exports and local archives.
+*.zip
+*.tar
+*.tar.gz
+
+# Webots local project metadata and generated thumbnails.
+**/worlds/.*.wbproj
+**/worlds/.*.jpg
+**/worlds/.*.png
+
+# Webots controller build outputs and local resource links.
+**/controllers/*/build/
+**/controllers/*/resources
+**/controllers/*/*.exe
+summer_school/controllers/epuck_controller/epuck_controller
+summer_school/controllers/supervisor/supervisor

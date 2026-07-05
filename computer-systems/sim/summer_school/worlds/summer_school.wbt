@@ -1,0 +1,1990 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+IMPORTABLE EXTERNPROTO "/home/yan/pictschool-2026/computer-systems/sim/summer_school/worlds/RubberDuck.proto"
+
+WorldInfo {
+}
+Viewpoint {
+  orientation -0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0944
+  position 0 2.0116105600927299e-16 1.8118977137696346
+}
+TexturedBackgroundLight {
+}
+DEF e-puck E-puck {
+  hidden translation_1 0 0.026 0.02
+  hidden rotation_1 0 -1 0 7.300048299977715e-08
+  hidden translation_2 0 -0.026 0.02
+  hidden rotation_2 0 1 0 0
+  translation -0.4499818981581265 -0.4492262342895965 -0.005063985659575715
+  rotation 0.0009293003817643015 0.9924939159623634 0.12229048686833156 0.0008590529182905685
+  controller "epuck_controller"
+}
+DEF e-puck-2 E-puck {
+  hidden translation_1 0 0.026 0.02
+  hidden rotation_1 0 0.9999999999999999 0 7.300048299977715e-08
+  hidden translation_2 0 -0.026 0.02
+  hidden rotation_2 0 1 0 0
+  translation 0.2519052754796811 0.050240530756260886 -0.005063978192095302
+  rotation 0.0003949242038158483 2.618757978426521e-06 0.9999999220140047 -3.1305518538794885
+  name "e-puck(1)"
+  controller "epuck_controller"
+}
+Background {
+  skyColor [
+    0.15 0.45 1
+  ]
+  backUrl [
+    "full-2288084647.jpg"
+  ]
+  bottomUrl [
+    "1678230795_klau-club-p-besshovnaya-tekstura-travi-vkontakte-48-850958280.jpg"
+  ]
+  frontUrl [
+    "full-2288084647.jpg"
+  ]
+  leftUrl [
+    "full-2288084647.jpg"
+  ]
+  rightUrl [
+    "full-2288084647.jpg"
+  ]
+  topUrl [
+    "full-2288084647.jpg"
+  ]
+}
+Solid {
+  translation 0 0 -0.01
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          transparency 0.8
+        }
+        texture ImageTexture {
+          url [
+            "New Piskel-1.png.png"
+          ]
+        }
+      }
+      geometry Box {
+        size 1 1 0.01
+      }
+    }
+  ]
+  boundingObject Box {
+    size 1 1 0.01
+  }
+  locked TRUE
+}
+Robot {
+  children [
+    DEF Emitter Emitter {
+      channel 1
+    }
+  ]
+  name "supervisor"
+  controller "supervisor"
+  supervisor TRUE
+}
+DEF platform_0_0 Solid {
+  translation -0.45 -0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(1)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_0_1 Solid {
+  translation -0.45 -0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(2)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_0_2 Solid {
+  translation -0.45 -0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(3)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_0_3 Solid {
+  translation -0.45 -0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(4)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_0_4 Solid {
+  translation -0.45 -0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(5)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_0_5 Solid {
+  translation -0.45 0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(6)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_0_6 Solid {
+  translation -0.45 0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(7)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_0_7 Solid {
+  translation -0.45 0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(8)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_0_8 Solid {
+  translation -0.45 0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(9)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_0_9 Solid {
+  translation -0.45 0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(10)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_1_0 Solid {
+  translation -0.35 -0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(11)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_1_1 Solid {
+  translation -0.35 -0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(12)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_1_2 Solid {
+  translation -0.35 -0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(13)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_1_3 Solid {
+  translation -0.35 -0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(14)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_1_4 Solid {
+  translation -0.35 -0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(15)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_1_5 Solid {
+  translation -0.35 0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(16)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_1_6 Solid {
+  translation -0.35 0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(17)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_1_7 Solid {
+  translation -0.35 0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(18)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_1_8 Solid {
+  translation -0.35 0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(19)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_1_9 Solid {
+  translation -0.35 0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(20)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_2_0 Solid {
+  translation -0.25 -0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(21)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_2_1 Solid {
+  translation -0.25 -0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(22)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_2_2 Solid {
+  translation -0.25 -0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(23)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_2_3 Solid {
+  translation -0.25 -0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(24)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_2_4 Solid {
+  translation -0.25 -0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(25)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_2_5 Solid {
+  translation -0.25 0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(26)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_2_6 Solid {
+  translation -0.25 0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(27)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_2_7 Solid {
+  translation -0.25 0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(28)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_2_8 Solid {
+  translation -0.25 0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(29)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_2_9 Solid {
+  translation -0.25 0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(30)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_3_0 Solid {
+  translation -0.15 -0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(31)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_3_1 Solid {
+  translation -0.15 -0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(32)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_3_2 Solid {
+  translation -0.15 -0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(33)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_3_3 Solid {
+  translation -0.15 -0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(34)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_3_4 Solid {
+  translation -0.15 -0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(35)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_3_5 Solid {
+  translation -0.15 0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(36)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_3_6 Solid {
+  translation -0.15 0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(37)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_3_7 Solid {
+  translation -0.15 0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(38)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_3_8 Solid {
+  translation -0.15 0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(39)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_3_9 Solid {
+  translation -0.15 0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(40)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_4_0 Solid {
+  translation -0.05 -0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(41)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_4_1 Solid {
+  translation -0.05 -0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(42)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_4_2 Solid {
+  translation -0.05 -0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(43)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_4_3 Solid {
+  translation -0.05 -0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(44)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_4_4 Solid {
+  translation -0.05 -0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(45)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_4_5 Solid {
+  translation -0.05 0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(46)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_4_6 Solid {
+  translation -0.05 0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(47)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_4_7 Solid {
+  translation -0.05 0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(48)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_4_8 Solid {
+  translation -0.05 0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(49)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_4_9 Solid {
+  translation -0.05 0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(50)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_5_0 Solid {
+  translation 0.05 -0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(51)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_5_1 Solid {
+  translation 0.05 -0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(52)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_5_2 Solid {
+  translation 0.05 -0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(53)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_5_3 Solid {
+  translation 0.05 -0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(54)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_5_4 Solid {
+  translation 0.05 -0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(55)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_5_5 Solid {
+  translation 0.05 0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(56)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_5_6 Solid {
+  translation 0.05 0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(57)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_5_7 Solid {
+  translation 0.05 0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(58)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_5_8 Solid {
+  translation 0.05 0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(59)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_5_9 Solid {
+  translation 0.05 0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(60)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_6_0 Solid {
+  translation 0.15 -0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(61)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_6_1 Solid {
+  translation 0.15 -0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(62)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_6_2 Solid {
+  translation 0.15 -0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(63)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_6_3 Solid {
+  translation 0.15 -0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(64)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_6_4 Solid {
+  translation 0.15 -0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(65)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_6_5 Solid {
+  translation 0.15 0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(66)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_6_6 Solid {
+  translation 0.15 0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(67)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_6_7 Solid {
+  translation 0.15 0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(68)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_6_8 Solid {
+  translation 0.15 0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(69)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_6_9 Solid {
+  translation 0.15 0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(70)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_7_0 Solid {
+  translation 0.25 -0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(71)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_7_1 Solid {
+  translation 0.25 -0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(72)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_7_2 Solid {
+  translation 0.25 -0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(73)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_7_3 Solid {
+  translation 0.25 -0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(74)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_7_4 Solid {
+  translation 0.25 -0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(75)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_7_5 Solid {
+  translation 0.25 0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(76)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_7_6 Solid {
+  translation 0.25 0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(77)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_7_7 Solid {
+  translation 0.25 0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(78)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_7_8 Solid {
+  translation 0.25 0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(79)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_7_9 Solid {
+  translation 0.25 0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(80)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_8_0 Solid {
+  translation 0.35 -0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(81)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_8_1 Solid {
+  translation 0.35 -0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(82)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_8_2 Solid {
+  translation 0.35 -0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(83)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_8_3 Solid {
+  translation 0.35 -0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(84)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_8_4 Solid {
+  translation 0.35 -0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(85)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_8_5 Solid {
+  translation 0.35 0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(86)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_8_6 Solid {
+  translation 0.35 0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(87)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_8_7 Solid {
+  translation 0.35 0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(88)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_8_8 Solid {
+  translation 0.35 0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(89)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_8_9 Solid {
+  translation 0.35 0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(90)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_9_0 Solid {
+  translation 0.45 -0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(91)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_9_1 Solid {
+  translation 0.45 -0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(92)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_9_2 Solid {
+  translation 0.45 -0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(93)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_9_3 Solid {
+  translation 0.45 -0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(94)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_9_4 Solid {
+  translation 0.45 -0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(95)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_9_5 Solid {
+  translation 0.45 0.05 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(96)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_9_6 Solid {
+  translation 0.45 0.15 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(97)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_9_7 Solid {
+  translation 0.45 0.25 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(98)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_9_8 Solid {
+  translation 0.45 0.35 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(99)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}
+DEF platform_9_9 Solid {
+  translation 0.45 0.45 -0.1
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.2 0.2 0.2
+        }
+      }
+      geometry Box {
+        size 0.1 0.1 0.01
+      }
+    }
+  ]
+  name "solid(100)"
+  boundingObject Box {
+    size 0.1 0.1 0.01
+  }
+}

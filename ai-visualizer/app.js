@@ -95,6 +95,10 @@ const commandLabels = {
   2: "B",
   3: "L",
   4: "R",
+  10: "F2",
+  11: "U",
+  12: "SR",
+  13: "SL",
 };
 
 function renderQueue() {
@@ -250,4 +254,3 @@ els.startRoundButton.addEventListener("click", () => {
 connect().catch(() => {
   els.status.textContent = "Start backend stack first";
 });
-

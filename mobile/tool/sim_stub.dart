@@ -64,7 +64,7 @@ Map<String, int> _move(
   return inside && !blocked ? candidate : position;
 }
 
-/// Проигрывает команды 1..4 и возвращает ответ в формате SimulationCommandResult.
+/// Проигрывает базовые команды 1..4 и возвращает ответ в формате SimulationCommandResult.
 Map<String, dynamic> _handle(Map<String, dynamic> request) {
   final actor = request['actor'] as String;
   final commands =

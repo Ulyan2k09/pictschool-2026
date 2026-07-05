@@ -232,9 +232,9 @@ button:disabled {
   grid-column: 2;
   grid-row: 2;
   display: grid;
-  grid-template-columns: repeat(8, minmax(36px, 1fr));
-  grid-template-rows: repeat(6, minmax(36px, 1fr));
-  aspect-ratio: 8 / 6;
+  grid-template-columns: repeat(10, minmax(36px, 1fr));
+  grid-template-rows: repeat(10, minmax(36px, 1fr));
+  aspect-ratio: 1;
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;

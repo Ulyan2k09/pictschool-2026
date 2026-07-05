@@ -53,6 +53,7 @@ fi
 export HTTP_HOST="${HTTP_HOST:-127.0.0.1}"
 export HTTP_PORT="${HTTP_PORT:-8080}"
 export AGENT_BACKEND_URL="${AGENT_BACKEND_URL:-http://127.0.0.1:8080}"
+export SIM_DRIVER="${SIM_DRIVER:-emulator}"
 
 cleanup() {
   local exit_code=$?
@@ -65,8 +66,20 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
-echo "[stack] starting simulation emulator on 127.0.0.1:5055"
-"${PYTHON_CMD[@]}" "$SIM_DIR/tcp_emulator.py" --host 127.0.0.1 --port 5055 --agent-mode manual &
+if [[ "$SIM_DRIVER" == "webots" ]]; then
+  echo "[stack] starting Webots bridge on 127.0.0.1:5055 -> ${WEBOTS_HOST:-127.0.0.1}:${WEBOTS_ROBOT_PORT:-10000}/${WEBOTS_AGENT_PORT:-10001}"
+  "${PYTHON_CMD[@]}" "$SIM_DIR/webots_bridge.py" \
+    --host 127.0.0.1 \
+    --port 5055 \
+    --webots-host "${WEBOTS_HOST:-127.0.0.1}" \
+    --robot-port "${WEBOTS_ROBOT_PORT:-10000}" \
+    --agent-port "${WEBOTS_AGENT_PORT:-10001}" \
+    --agent-mode manual \
+    --backend-url "http://${HTTP_HOST}:${HTTP_PORT}" &
+else
+  echo "[stack] starting simulation emulator on 127.0.0.1:5055"
+  "${PYTHON_CMD[@]}" "$SIM_DIR/tcp_emulator.py" --host 127.0.0.1 --port 5055 --agent-mode manual &
+fi
 SIM_PID=$!
 
 echo "[stack] starting backend on http://${HTTP_HOST}:${HTTP_PORT}"
