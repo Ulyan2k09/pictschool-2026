@@ -10,6 +10,8 @@ class RoundEngine(
     private val tcpSender: TcpCommandSender,
     private val config: AppConfig
 ) {
+    private val allowedCommands = setOf(1, 2, 3, 4, 10, 11, 12, 13)
+
     fun startRound(scenarioId: String?): Round {
         val round = Scenario.defaultRound(status = RoundStatus.RUNNING)
         store.replace(round)
@@ -159,17 +161,14 @@ class RoundEngine(
         if (commands.isEmpty() || commands.size > round.moveLimitPerTurn) {
             return ApiError("turn_limit_exceeded", "В ходе должно быть от 1 до ${round.moveLimitPerTurn} команд.")
         }
-        val unknown = commands.firstOrNull { it !in 1..4 }
+        val unknown = commands.firstOrNull { it !in allowedCommands }
         if (unknown != null) {
             return ApiError(
                 "unknown_command",
                 "Команда $unknown не поддерживается.",
                 buildJsonObject {
                     put("allowed", buildJsonArray {
-                        add(1)
-                        add(2)
-                        add(3)
-                        add(4)
+                        allowedCommands.sorted().forEach { add(it) }
                     })
                 }
             )

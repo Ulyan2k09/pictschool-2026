@@ -6,9 +6,19 @@ from datetime import datetime, timezone
 from typing import Any
 
 
-ALLOWED_COMMANDS = {1, 2, 3, 4}
+ALLOWED_COMMANDS = {1, 2, 3, 4, 10, 11, 12, 13}
 AGENT_HARDCODED_COMMANDS = [1, 1, 4, 1]
 DIRECTIONS = ["N", "E", "S", "W"]
+COMMAND_EXPANSIONS = {
+    1: [1],
+    2: [2],
+    3: [3],
+    4: [4],
+    10: [1, 1],
+    11: [3, 3],
+    12: [4, 1, 3],
+    13: [3, 1, 4],
+}
 
 
 def turn_left(direction: str) -> str:
@@ -40,19 +50,27 @@ def apply_commands(
     direction: str,
     commands: list[int],
     field: dict[str, Any],
-) -> tuple[dict[str, int], str]:
+) -> tuple[dict[str, int], str, list[dict[str, int]]]:
     next_position = dict(position)
     next_direction = direction
-    for command in commands:
+    visited_positions: list[dict[str, int]] = []
+    primitive_commands = [primitive for command in commands for primitive in COMMAND_EXPANSIONS.get(command, [])]
+    for command in primitive_commands:
         if command == 1:
-            next_position = move(next_position, next_direction, 1, field)
+            moved_position = move(next_position, next_direction, 1, field)
+            if moved_position != next_position:
+                next_position = moved_position
+                visited_positions.append(dict(next_position))
         elif command == 2:
-            next_position = move(next_position, next_direction, -1, field)
+            moved_position = move(next_position, next_direction, -1, field)
+            if moved_position != next_position:
+                next_position = moved_position
+                visited_positions.append(dict(next_position))
         elif command == 3:
             next_direction = turn_left(next_direction)
         elif command == 4:
             next_direction = turn_right(next_direction)
-    return next_position, next_direction
+    return next_position, next_direction, visited_positions
 
 
 def remaining_ducks(field: dict[str, Any]) -> list[dict[str, Any]]:
@@ -125,12 +143,14 @@ def simulate(request: dict[str, Any], agent_mode: str) -> dict[str, Any]:
             "error": f"Invalid commands: {invalid}",
         }
 
-    position, direction = apply_commands(actor_state["position"], actor_state["direction"], commands, field)
+    position, direction, visited_positions = apply_commands(
+        actor_state["position"], actor_state["direction"], commands, field
+    )
 
     ducks_collected = [
         duck["id"]
         for duck in field["ducks"]
-        if duck.get("collectedBy") is None and duck["position"] == position
+        if duck.get("collectedBy") is None and any(step == duck["position"] for step in visited_positions)
     ]
 
     return {

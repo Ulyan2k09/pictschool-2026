@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/app_theme.dart';
 import '../../state/game_controller.dart';
 
-/// Одна команда движения: код (1..4), иконка и подпись.
+/// Одна команда движения: код, иконка и подпись.
 class _Command {
   final int code;
   final IconData icon;

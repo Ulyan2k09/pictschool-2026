@@ -184,8 +184,8 @@ components:
           maxItems: 5
           items:
             type: integer
-            enum: [1, 2, 3, 4]
-          description: "1 forward, 2 backward, 3 turn left, 4 turn right"
+            enum: [1, 2, 3, 4, 10, 11, 12, 13]
+          description: "1 forward, 2 backward, 3 turn left, 4 turn right; 10 forward twice, 11 U-turn, 12 step right, 13 step left"
     TurnAcceptedResponse:
       type: object
       required: [accepted, eventId, forwardedAs]
@@ -277,10 +277,10 @@ components:
           example: 5
         ducksTotal:
           type: integer
-          example: 8
+          example: 10
         ducksLeft:
           type: integer
-          example: 8
+          example: 10
         score:
           $ref: "#/components/schemas/Score"
         field:
@@ -295,10 +295,10 @@ components:
       properties:
         width:
           type: integer
-          example: 8
+          example: 10
         height:
           type: integer
-          example: 6
+          example: 10
         obstacles:
           type: array
           items:

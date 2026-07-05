@@ -40,7 +40,7 @@
     "code": "unknown_command",
     "message": "Команда 7 не поддерживается.",
     "details": {
-      "allowed": [1, 2, 3, 4]
+      "allowed": [1, 2, 3, 4, 10, 11, 12, 13]
     }
   }
 }

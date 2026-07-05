@@ -10,7 +10,9 @@ object Scenario {
             Duck("duck-5", Position(5, 3)),
             Duck("duck-6", Position(0, 5)),
             Duck("duck-7", Position(4, 5)),
-            Duck("duck-8", Position(7, 2))
+            Duck("duck-8", Position(7, 2)),
+            Duck("duck-9", Position(8, 7)),
+            Duck("duck-10", Position(2, 8))
         )
         return Round(
             id = "round-1",
@@ -22,17 +24,19 @@ object Scenario {
             ducksLeft = ducks.size,
             score = Score(0, 0),
             field = Field(
-                width = 8,
-                height = 6,
+                width = 10,
+                height = 10,
                 obstacles = listOf(
                     Obstacle("wall-1", Position(3, 2)),
-                    Obstacle("wall-2", Position(4, 2))
+                    Obstacle("wall-2", Position(4, 2)),
+                    Obstacle("wall-3", Position(6, 6)),
+                    Obstacle("wall-4", Position(7, 6))
                 ),
                 ducks = ducks
             ),
             actors = mapOf(
                 ActorId.ROBOT to ActorState(ActorId.ROBOT, Position(0, 0), Direction.E, 0, null),
-                ActorId.AGENT to ActorState(ActorId.AGENT, Position(7, 5), Direction.W, 0, null)
+                ActorId.AGENT to ActorState(ActorId.AGENT, Position(9, 9), Direction.W, 0, null)
             )
         )
     }

@@ -14,12 +14,12 @@ void main() {
       "activeActor": "robot",
       "turnNumber": 3,
       "moveLimitPerTurn": 5,
-      "ducksTotal": 8,
-      "ducksLeft": 6,
+      "ducksTotal": 10,
+      "ducksLeft": 8,
       "score": { "robot": 1, "agent": 1 },
       "field": {
-        "width": 8,
-        "height": 6,
+        "width": 10,
+        "height": 10,
         "obstacles": [
           { "id": "wall-1", "position": { "x": 3, "y": 2 } }
         ],
@@ -30,7 +30,7 @@ void main() {
       },
       "actors": {
         "robot": { "id": "robot", "position": { "x": 2, "y": 0 }, "direction": "E", "collectedDucks": 1, "lastError": null },
-        "agent": { "id": "agent", "position": { "x": 7, "y": 5 }, "direction": "W", "collectedDucks": 1, "lastError": null }
+        "agent": { "id": "agent", "position": { "x": 9, "y": 9 }, "direction": "W", "collectedDucks": 1, "lastError": null }
       }
     }
   }
@@ -45,7 +45,7 @@ void main() {
     expect(round.activeActor, 'robot');
     expect(round.turnNumber, 3);
     expect(round.moveLimitPerTurn, 5);
-    expect(round.ducksLeft, 6);
+    expect(round.ducksLeft, 8);
     expect(round.score.robot, 1);
     expect(round.score.agent, 1);
   });
@@ -54,8 +54,8 @@ void main() {
     final json = jsonDecode(rawRoundResponse) as Map<String, dynamic>;
     final round = Round.fromJson(json['round'] as Map<String, dynamic>);
 
-    expect(round.field.width, 8);
-    expect(round.field.height, 6);
+    expect(round.field.width, 10);
+    expect(round.field.height, 10);
     expect(round.field.obstacles.single.position, const Position(3, 2));
     expect(round.field.ducks.length, 2);
 
@@ -74,7 +74,7 @@ void main() {
     expect(round.robot, isNotNull);
     expect(round.robot!.position, const Position(2, 0));
     expect(round.robot!.direction, 'E');
-    expect(round.agent!.position, const Position(7, 5));
+    expect(round.agent!.position, const Position(9, 9));
   });
 
   test('GameEvent.fromJson читает событие журнала', () {

@@ -22,7 +22,7 @@ class GameController extends ChangeNotifier {
   // ---- состояние, которое читает UI ----
   Round? _round;
   List<GameEvent> _events = const [];
-  final List<int> _queue = <int>[]; // коды 1..4, которые собрал игрок
+  final List<int> _queue = <int>[]; // коды команд, которые собрал игрок
   bool _busy = false; // идёт действие пользователя (submit/start/reset)
   bool _loading = true; // идёт самая первая загрузка
   bool _online = true; // есть ли связь с backend
